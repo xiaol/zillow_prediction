@@ -6,37 +6,41 @@ import xgboost as xgb
 import gc
 from sklearn.preprocessing import OneHotEncoder
 
+
+def prepare_data(df, columns):
+    df = pd.get_dummies(df, columns=columns, prefix=columns)
+    return df
+
 print('Loading data ...')
 
 train = pd.read_csv('../../data/train_2016_v2.csv')
 prop = pd.read_csv('../../data/properties_2016.csv')
 sample = pd.read_csv('../../data/sample_submission.csv')
 
-'''
 print('Binding to float32')
 for c, dtype in zip(prop.columns, prop.dtypes):
 	if dtype == np.float64:
 		prop[c] = prop[c].astype(np.float32)
-'''
 
 print('Creating training set ...')
+drop_cols = ['parcelid', 'logerror', 'transactiondate', 'latitude', 'longitude']
+
+one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid', 'storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip', 'hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag',  'propertyzoningdesc', 'propertycountylandusecode']
 
 df_train = train.merge(prop, how='left', on='parcelid')
-
-
-df_train['logerror'].value_counts().plot()
 
 # drop outliers
 df_train = df_train[df_train.logerror > -4]
 df_train = df_train[df_train.logerror < 4]
-x_train = df_train.drop(['parcelid', 'logerror', 'transactiondate', 'propertyzoningdesc', 'propertycountylandusecode'], axis=1)
+
+x_train = df_train.drop(drop_cols, axis=1)
+train_columns = x_train.columns
+x_train = prepare_data(x_train, one_hot_encode_cols)
+
 y_train = df_train['logerror'].values
 print(x_train.shape, y_train.shape)
+print x_train.dtypes
 
-train_columns = x_train.columns
-
-for c in x_train.dtypes[x_train.dtypes == object].index.values:
-    x_train[c] = (x_train[c] == True)
 
 del df_train; gc.collect()
 
@@ -77,8 +81,8 @@ df_test = sample.merge(prop, on='parcelid', how='left')
 del prop; gc.collect()
 
 x_test = df_test[train_columns]
-for c in x_test.dtypes[x_test.dtypes == object].index.values:
-    x_test[c] = (x_test[c] == True)
+x_test = prepare_data(x_test, one_hot_encode_cols)
+
 
 del df_test, sample; gc.collect()
 
@@ -97,13 +101,9 @@ for c in sub.columns[sub.columns != 'ParcelId']:
     sub[c] = p_test
 
 print('Writing csv ...')
-sub.to_csv('../../data/xgb_starter.csv', index=False, float_format='%.4f')
+sub.to_csv('../../data/xgb.csv', index=False, float_format='%.4f')
 
 
-def prepare_data(df, columns):
-    one_hot = OneHotEncoder()
-    for col in columns:
-        df[col] = one_hot.fit_transform(df[col])
-    return df
+
 
 # Thanks to @inversion
