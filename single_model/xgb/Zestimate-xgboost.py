@@ -8,7 +8,7 @@ from sklearn.preprocessing import OneHotEncoder
 
 
 def prepare_data(df, columns):
-    df = pd.get_dummies(df, columns=columns, prefix=columns)
+    df = pd.get_dummies(df, columns=columns, prefix=columns, sparse=True)
     return df
 
 print('Loading data ...')
@@ -19,8 +19,8 @@ sample = pd.read_csv('../../data/sample_submission.csv')
 
 print('Binding to float32')
 for c, dtype in zip(prop.columns, prop.dtypes):
-	if dtype == np.float64:
-		prop[c] = prop[c].astype(np.float32)
+    if dtype == np.float64:
+        prop[c] = prop[c].astype(np.float32)
 
 print('Creating training set ...')
 drop_cols = ['parcelid', 'logerror', 'transactiondate', 'latitude', 'longitude']
@@ -71,12 +71,14 @@ params['silent'] = 1
 watchlist = [(d_train, 'train'), (d_valid, 'valid')]
 clf = xgb.train(params, d_train, 10000, watchlist, early_stopping_rounds=100, verbose_eval=10)
 
+#xgb.plot_importance(clf)
 del d_train, d_valid
 
 print('Building test set ...')
 
 sample['parcelid'] = sample['ParcelId']
 df_test = sample.merge(prop, on='parcelid', how='left')
+print(df_test.shape)
 
 del prop; gc.collect()
 
