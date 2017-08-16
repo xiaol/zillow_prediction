@@ -5,7 +5,7 @@ import xgboost as xgb
 import gc
 from sklearn.preprocessing import OneHotEncoder
 
-drop_cols = ['parcelid', 'logerror', 'transactiondate', 'latitude', 'longitude','propertyzoningdesc']
+drop_cols = ['parcelid', 'logerror', 'transactiondate', 'latitude', 'longitude', 'propertyzoningdesc']
 # [257]	train-mae:0.052669	valid-mae:0.051891
 # [278]	train-mae:0.052569	valid-mae:0.051863
 one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid', 'storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip', 'hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode']
@@ -27,11 +27,6 @@ train = pd.read_csv('../../data/train_2016_v2.csv')
 prop = pd.read_csv('../../data/properties_2016.csv')
 sample = pd.read_csv('../../data/sample_submission.csv')
 
-# prop = prop.head(1000)
-
-prop = prepare_data(prop, one_hot_encode_cols)
-print(prop.shape)
-
 print('Binding to float32')
 for c, dtype in zip(prop.columns, prop.dtypes):
     if dtype == np.float64:
@@ -39,13 +34,16 @@ for c, dtype in zip(prop.columns, prop.dtypes):
 
 print('Creating training set ...')
 
-df_train = train.merge(prop, how='left', on='parcelid', copy=False)
+df_train = train.merge(prop, how='left', on='parcelid')
 
 # drop outliers
 df_train = df_train[df_train.logerror > -0.4]
 df_train = df_train[df_train.logerror < 0.419]
 
+
 x_train = df_train.drop(drop_cols, axis=1)
+x_train = prepare_data(x_train, one_hot_encode_cols)
+
 train_columns = x_train.columns
 
 y_train = df_train['logerror'].values
@@ -94,9 +92,18 @@ p_test = np.array([])
 
 print(sample.shape)
 
-for fold in chunks(sample, 50000):
-    df_test_fold = fold.merge(prop, on='parcelid', how='left', copy=False)
-    x_test_fold = df_test_fold[train_columns]
+for fold in chunks(sample, 80000):
+    df_test_fold = fold.merge(prop, on='parcelid', how='left')
+    x_test_fold = prepare_data(df_test_fold, one_hot_encode_cols)
+
+    sub_cols = set(train_columns).intersection(set(x_test_fold.columns))
+    x_test_fold = x_test_fold[list(sub_cols)]
+    sLength = x_test_fold.shape[0]
+    for train_col in train_columns:
+        if train_col not in x_test_fold.columns:
+            x_test_fold[train_col] = pd.Series(np.zeros((sLength)), index=x_test_fold.index)
+
+    x_test_fold = x_test_fold[train_columns.tolist()]
 
     d_test_cks = xgb.DMatrix(x_test_fold)
     p_test_cks = clf.predict(d_test_cks)
@@ -106,9 +113,7 @@ for fold in chunks(sample, 50000):
     del d_test_cks; gc.collect()
     del df_test_fold, x_test_fold; gc.collect()
 
-
 del prop, sample; gc.collect()
-print(p_test.shape)
 
 sub = pd.read_csv('../../data/sample_submission.csv')
 for c in sub.columns[sub.columns != 'ParcelId']:
@@ -117,5 +122,5 @@ for c in sub.columns[sub.columns != 'ParcelId']:
 print('Writing csv ...')
 sub.to_csv('../../data/xgb.csv', index=False, float_format='%.4f')
 
-
+# first 0.0645657
 # Thanks to @inversion
