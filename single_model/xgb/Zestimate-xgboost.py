@@ -26,7 +26,7 @@ def get_features(df):
 
     df = df.drop('transactiondate', axis=1)
 
-    df.fillna(0)
+    df.fillna(df.mean())
     return df
 
 def chunks(l, n):
