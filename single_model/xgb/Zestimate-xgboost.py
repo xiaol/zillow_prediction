@@ -101,35 +101,39 @@ print('Predicting on test ...')
 sub = pd.read_csv('../../data/sample_submission.csv')
 sample['parcelid'] = sample['ParcelId']
 print(sample.shape)
-p_test = np.array([])
-
-for fold in chunks(sample, 80000):
-    df_test_fold = fold.merge(prop, on='parcelid', how='left')
-    x_test_fold = prepare_data(df_test_fold, one_hot_encode_cols)
-    # transactiondate = c[:4] + '-' + c[4:] +'-01'
-    transactiondate = '2017-12-01'
-    x_test_fold['transactiondate'] = transactiondate
-    x_test_fold = get_features(x_test_fold)
-
-    sub_cols = set(train_columns).intersection(set(x_test_fold.columns))
-    x_test_fold = x_test_fold[list(sub_cols)]
-    sLength = x_test_fold.shape[0]
-    for train_col in train_columns:
-        if train_col not in x_test_fold.columns:
-            x_test_fold[train_col] = pd.Series(np.zeros((sLength)), index=x_test_fold.index)
-
-    x_test_fold = x_test_fold[train_columns.tolist()]
-
-    d_test_cks = xgb.DMatrix(x_test_fold)
-    p_test_cks = clf.predict(d_test_cks)
-
-    p_test = np.append(p_test, p_test_cks)
-
-    del d_test_cks; gc.collect()
-    del df_test_fold, x_test_fold; gc.collect()
 
 for c in sub.columns[sub.columns != 'ParcelId']:
-    sub[c] = p_test
+    if c > '201709':
+        sub[c] = p_test
+        continue
+    p_test = np.array([])
+
+    for fold in chunks(sample, 80000):
+        df_test_fold = fold.merge(prop, on='parcelid', how='left')
+        x_test_fold = prepare_data(df_test_fold, one_hot_encode_cols)
+        transactiondate = c[:4] + '-' + c[4:] +'-01'
+        # transactiondate = '2017-12-01'
+        x_test_fold['transactiondate'] = transactiondate
+        x_test_fold = get_features(x_test_fold)
+
+        sub_cols = set(train_columns).intersection(set(x_test_fold.columns))
+        x_test_fold = x_test_fold[list(sub_cols)]
+        sLength = x_test_fold.shape[0]
+        for train_col in train_columns:
+            if train_col not in x_test_fold.columns:
+                x_test_fold[train_col] = pd.Series(np.zeros((sLength)), index=x_test_fold.index)
+
+        x_test_fold = x_test_fold[train_columns.tolist()]
+
+        d_test_cks = xgb.DMatrix(x_test_fold)
+        p_test_cks = clf.predict(d_test_cks)
+
+        p_test = np.append(p_test, p_test_cks)
+
+        del d_test_cks; gc.collect()
+        del df_test_fold, x_test_fold; gc.collect()
+
+        sub[c] = p_test
 
 del prop, sample; gc.collect()
 
