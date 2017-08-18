@@ -3,10 +3,14 @@ import numpy as np
 import pandas as pd
 import xgboost as xgb
 import gc
+from datetime import datetime
 from sklearn.preprocessing import OneHotEncoder
 
 drop_cols = ['parcelid','logerror']  # 'latitude', 'longitude']
-one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid', 'storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip', 'hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc']
+one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid',
+                       'storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip',
+                       'hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid',
+                       'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid']
 
 
 def prepare_data(df, columns):
@@ -133,11 +137,14 @@ for c in sub.columns[sub.columns != 'ParcelId']:
         del d_test_cks; gc.collect()
         del df_test_fold, x_test_fold; gc.collect()
 
+    print('Completed one test column')
+
     sub[c] = p_test
 
 del prop, sample; gc.collect()
 
 print('Writing csv ...')
+file_path = '../../data/xgb' + datetime.now().strftime("%m_%d_%H_%M_%S")
 sub.to_csv('../../data/xgb.csv', index=False, float_format='%.4f')
 
 # #1 0.0645657  [270]	train-mae:0.052583	valid-mae:0.051849
