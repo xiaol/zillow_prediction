@@ -25,6 +25,8 @@ def get_features(df):
     df['transaction_day'] = df['transactiondate'].dt.weekday.astype(np.int8)
 
     df = df.drop('transactiondate', axis=1)
+
+    df.fillna(0)
     return df
 
 def chunks(l, n):
