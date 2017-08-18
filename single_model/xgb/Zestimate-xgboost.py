@@ -5,10 +5,8 @@ import xgboost as xgb
 import gc
 from sklearn.preprocessing import OneHotEncoder
 
-drop_cols = ['parcelid', 'logerror', 'transactiondate', 'latitude', 'longitude', 'propertyzoningdesc']
-# [257]	train-mae:0.052669	valid-mae:0.051891
-# [278]	train-mae:0.052569	valid-mae:0.051863
-one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid', 'storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip', 'hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode']
+drop_cols = ['parcelid','logerror']  # 'latitude', 'longitude']
+one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid', 'storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip', 'hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc']
 
 
 def prepare_data(df, columns):
@@ -16,7 +14,17 @@ def prepare_data(df, columns):
     return df
 
 
+def get_features(df):
+    df['transactiondate'] = pd.to_datetime(df['transactiondate'])
+
+    df['transaction_month'] = df['transactiondate'].dt.month.astype(np.int8)
+    # df['transaction_day'] = df['transactiondate'].dt.weekday.astype(np.int8)
+
+    df = df.drop('transactiondate', axis=1)
+    return df
+
 def chunks(l, n):
+
     """Yield successive n-sized chunks from l."""
     for i in range(0, len(l), n):
         yield l[i:i + n]
@@ -43,6 +51,7 @@ df_train = df_train[df_train.logerror < 0.419]
 
 x_train = df_train.drop(drop_cols, axis=1)
 x_train = prepare_data(x_train, one_hot_encode_cols)
+x_train = get_features(x_train)
 
 train_columns = x_train.columns
 
@@ -69,7 +78,7 @@ params = {}
 params['eta'] = 0.02
 params['objective'] = 'reg:linear'
 params['eval_metric'] = 'mae'
-params['min_child_weight'] = 20
+params['min_child_weight'] = 1
 params['colsample_bytree'] = 0.2
 params['max_depth'] = 5
 params['lambda'] = 0.3
@@ -86,15 +95,18 @@ del d_train, d_valid
 print('Building test set ...')
 
 print('Predicting on test ...')
-
+sub = pd.read_csv('../../data/sample_submission.csv')
 sample['parcelid'] = sample['ParcelId']
-p_test = np.array([])
-
 print(sample.shape)
+p_test = np.array([])
 
 for fold in chunks(sample, 80000):
     df_test_fold = fold.merge(prop, on='parcelid', how='left')
     x_test_fold = prepare_data(df_test_fold, one_hot_encode_cols)
+    # transactiondate = c[:4] + '-' + c[4:] +'-01'
+    transactiondate = '2017-12-01'
+    x_test_fold['transactiondate'] = transactiondate
+    x_test_fold = get_features(x_test_fold)
 
     sub_cols = set(train_columns).intersection(set(x_test_fold.columns))
     x_test_fold = x_test_fold[list(sub_cols)]
@@ -103,7 +115,7 @@ for fold in chunks(sample, 80000):
         if train_col not in x_test_fold.columns:
             x_test_fold[train_col] = pd.Series(np.zeros((sLength)), index=x_test_fold.index)
 
-    x_test_fold = x_test_fold[train_columns.tolist()]
+    x_test_fold = x_test_fold[ddddddddddddd.tolist()]
 
     d_test_cks = xgb.DMatrix(x_test_fold)
     p_test_cks = clf.predict(d_test_cks)
@@ -113,14 +125,21 @@ for fold in chunks(sample, 80000):
     del d_test_cks; gc.collect()
     del df_test_fold, x_test_fold; gc.collect()
 
-del prop, sample; gc.collect()
-
-sub = pd.read_csv('../../data/sample_submission.csv')
 for c in sub.columns[sub.columns != 'ParcelId']:
     sub[c] = p_test
+
+del prop, sample; gc.collect()
 
 print('Writing csv ...')
 sub.to_csv('../../data/xgb.csv', index=False, float_format='%.4f')
 
-# first 0.0645657
+# #1 0.0645657  [270]	train-mae:0.052583	valid-mae:0.051849
+
+# #2 0.0644769  [577]	train-mae:0.051888	valid-mae:0.051766
+
+# [977]	train-mae:0.051399	valid-mae:0.051709
+
+# 0.0644580 [670]	train-mae:0.051573	valid-mae:0.051681 ,
+# add coordinate feature, remove weekday feature, just predict 20171201 for speed.
+
 # Thanks to @inversion
