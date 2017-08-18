@@ -18,7 +18,7 @@ def get_features(df):
     df['transactiondate'] = pd.to_datetime(df['transactiondate'])
 
     df['transaction_month'] = df['transactiondate'].dt.month.astype(np.int8)
-    # df['transaction_day'] = df['transactiondate'].dt.weekday.astype(np.int8)
+    df['transaction_day'] = df['transactiondate'].dt.weekday.astype(np.int8)
 
     df = df.drop('transactiondate', axis=1)
     return df
@@ -41,12 +41,15 @@ for c, dtype in zip(prop.columns, prop.dtypes):
         prop[c] = prop[c].astype(np.float32)
 
 print('Creating training set ...')
-
+train = train.sort_values('transactiondate')
+train = train[train.transactiondate < '2017-01-01']
+split = train[train.transactiondate < '2016-10-01'].shape[0]
+print(split)
 df_train = train.merge(prop, how='left', on='parcelid')
 
 # drop outliers
-df_train = df_train[df_train.logerror > -0.4]
-df_train = df_train[df_train.logerror < 0.419]
+# df_train = df_train[df_train.logerror > -0.4]
+# df_train = df_train[df_train.logerror < 0.419]
 
 
 x_train = df_train.drop(drop_cols, axis=1)
@@ -62,7 +65,7 @@ print x_train.dtypes
 
 del df_train; gc.collect()
 
-split = 80000
+
 x_train, y_train, x_valid, y_valid = x_train[:split], y_train[:split], x_train[split:], y_train[split:]
 
 print('Building DMatrix...')
@@ -115,7 +118,7 @@ for fold in chunks(sample, 80000):
         if train_col not in x_test_fold.columns:
             x_test_fold[train_col] = pd.Series(np.zeros((sLength)), index=x_test_fold.index)
 
-    x_test_fold = x_test_fold[ddddddddddddd.tolist()]
+    x_test_fold = x_test_fold[train_columns.tolist()]
 
     d_test_cks = xgb.DMatrix(x_test_fold)
     p_test_cks = clf.predict(d_test_cks)
@@ -141,5 +144,7 @@ sub.to_csv('../../data/xgb.csv', index=False, float_format='%.4f')
 
 # 0.0644580 [670]	train-mae:0.051573	valid-mae:0.051681 ,
 # add coordinate feature, remove weekday feature, just predict 20171201 for speed.
+
+# [303]	train-mae:0.067442	valid-mae:0.066382
 
 # Thanks to @inversion
