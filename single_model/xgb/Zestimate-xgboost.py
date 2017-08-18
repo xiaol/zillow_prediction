@@ -7,10 +7,7 @@ from datetime import datetime
 from sklearn.preprocessing import OneHotEncoder
 
 drop_cols = ['parcelid','logerror']  # 'latitude', 'longitude']
-one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid',
-                       'storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip',
-                       'hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid',
-                       'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid']
+one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid']
 
 
 def prepare_data(df, columns):
@@ -30,7 +27,6 @@ def get_features(df):
     return df
 
 def chunks(l, n):
-
     """Yield successive n-sized chunks from l."""
     for i in range(0, len(l), n):
         yield l[i:i + n]
@@ -51,6 +47,9 @@ train = train.sort_values('transactiondate')
 train = train[train.transactiondate < '2017-01-01']
 split = train[train.transactiondate < '2016-10-01'].shape[0]
 print(split)
+
+train = train[train.logerror > -4]
+train = train[train.logerror < 3.5]
 df_train = train.merge(prop, how='left', on='parcelid')
 
 # drop outliers
@@ -83,17 +82,7 @@ del x_train, x_valid; gc.collect()
 
 print('Training ...')
 
-params = {}
-params['eta'] = 0.02
-params['objective'] = 'reg:linear'
-params['eval_metric'] = 'mae'
-params['min_child_weight'] = 1
-params['colsample_bytree'] = 0.2
-params['max_depth'] = 10
-params['lambda'] = 0.3
-params['alpha'] = 0.6
-params['silent'] = 1
-
+params = {'eta': 0.02, 'objective': 'reg:linear', 'eval_metric': 'mae', 'min_child_weight': 1, 'colsample_bytree': 0.2, 'max_depth': 7, 'lambda': 0.3, 'alpha': 0.6, 'silent': 1}
 
 watchlist = [(d_train, 'train'), (d_valid, 'valid')]
 clf = xgb.train(params, d_train, 10000, watchlist, early_stopping_rounds=100, verbose_eval=10)
