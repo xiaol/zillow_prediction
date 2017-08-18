@@ -133,7 +133,7 @@ for c in sub.columns[sub.columns != 'ParcelId']:
         del d_test_cks; gc.collect()
         del df_test_fold, x_test_fold; gc.collect()
 
-        sub[c] = p_test
+    sub[c] = p_test
 
 del prop, sample; gc.collect()
 
