@@ -5,7 +5,7 @@ import xgboost as xgb
 import gc
 from datetime import datetime
 from sklearn.preprocessing import OneHotEncoder
-from util import *
+# from util import *
 
 drop_cols = ['parcelid','logerror']  # 'latitude', 'longitude']
 one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid']
