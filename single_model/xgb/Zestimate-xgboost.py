@@ -74,7 +74,7 @@ df_train = train.merge(prop, how='left', on='parcelid')
 x_train = df_train
 x_train = prepare_data(x_train, one_hot_encode_cols)
 x_train = get_features(x_train)
-x_train = df_train.drop(drop_cols, axis=1)
+x_train = x_train.drop(drop_cols, axis=1)
 
 train_columns = x_train.columns
 
