@@ -5,8 +5,10 @@ import xgboost as xgb
 import gc
 from datetime import datetime
 from sklearn.preprocessing import OneHotEncoder
-# from util import *
 import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from util import *
 
 drop_cols = ['parcelid','logerror']  # 'latitude', 'longitude']
 one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid']
@@ -52,8 +54,8 @@ train = train[train.transactiondate < '2017-01-01']
 split = train[train.transactiondate < '2016-10-01'].shape[0]
 print(split)
 
-train = train[train.logerror > -4]
-train = train[train.logerror < 3.5]
+train = train[train.logerror > -0.4]
+train = train[train.logerror < 0.419]
 df_train = train.merge(prop, how='left', on='parcelid')
 
 # drop outliers
@@ -144,7 +146,7 @@ del prop, sample; gc.collect()
 
 print('Writing csv ...')
 file_path = '../../data/xgb' + datetime.now().strftime("%m_%d_%H_%M_%S")
-sub.to_csv('../../data/xgb.csv', index=False, float_format='%.4f')
+sub.to_csv(file_path, index=False, float_format='%.4f')
 
 # #1 0.0645657  [270]	train-mae:0.052583	valid-mae:0.051849
 
