@@ -1,41 +1,60 @@
 
-import sys
-import os
-import time
-import logging
-import ConfigParser
-import operator
-import numpy as np
+
+
 import pandas as pd
 
 
-def prepare_data():
-    pass
+def merge_count(df,columns,value,cname):
+    add = pd.DataFrame(df.groupby(columns)[value].count()).reset_index()
+    add.columns=columns+[cname]
+    df=df.merge(add,on=columns,how="left")
+    return df
 
 
-def run_model(config_name, model_dict, data_path):
-    config = ConfigParser.ConfigParser()
-    try:
-        config.read("models.config")
-        valid_mode_on = config.getboolean(config_name, "valid_mode_on")
-        if valid_mode_on:
-            train_path = os.path.join(data_path, "train-tr.csv")
-            test_path = os.path.join(data_path, "train-va.csv")
-        else:
-            train_path = os.path.join(data_path, "train.csv")
-            test_path = os.path.join(data_path, "test.csv")
-        model_list = map(lambda x: model_dict[x.strip()], config.get(config_name, "model_list").split(","))
-        output_path = os.path.join(config.get(config_name, "output_path"), config_name)
+def merge_nunique(df,columns,value,cname):
+    add = pd.DataFrame(df.groupby(columns)[value].nunique()).reset_index()
+    add.columns=columns+[cname]
+    df=df.merge(add,on=columns,how="left")
+    return df
 
-    except Exception as e:
-        logging.error("Could not load configuration file from models.config")
-        logging.error(str(e))
 
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s')
-    logging.info("Running config: [%s]" % config_name)
-    logging.info('Loading data')
-    df_train = pd.read_csv(train_path)
-    df_test = pd.read_csv(test_path)
+def merge_median(df,columns,value,cname):
+    add = pd.DataFrame(df.groupby(columns)[value].median()).reset_index()
+    add.columns=columns+[cname]
+    df=df.merge(add,on=columns,how="left")
+    return df
 
-    logging.info('Preparing train data')
 
+def merge_mean(df,columns,value,cname):
+    add = pd.DataFrame(df.groupby(columns)[value].mean()).reset_index()
+    add.columns=columns+[cname]
+    df=df.merge(add,on=columns,how="left")
+    return df
+
+
+def merge_sum(df,columns,value,cname):
+    add = pd.DataFrame(df.groupby(columns)[value].sum()).reset_index()
+    add.columns=columns+[cname]
+    df=df.merge(add,on=columns,how="left")
+    return df
+
+
+def merge_max(df,columns,value,cname):
+    add = pd.DataFrame(df.groupby(columns)[value].max()).reset_index()
+    add.columns=columns+[cname]
+    df=df.merge(add,on=columns,how="left")
+    return df
+
+
+def merge_min(df,columns,value,cname):
+    add = pd.DataFrame(df.groupby(columns)[value].min()).reset_index()
+    add.columns=columns+[cname]
+    df=df.merge(add,on=columns,how="left")
+    return df
+
+
+def merge_std(df,columns,value,cname):
+    add = pd.DataFrame(df.groupby(columns)[value].std()).reset_index()
+    add.columns=columns+[cname]
+    df=df.merge(add,on=columns,how="left")
+    return df

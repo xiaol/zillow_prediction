@@ -5,6 +5,7 @@ import xgboost as xgb
 import gc
 from datetime import datetime
 from sklearn.preprocessing import OneHotEncoder
+from util import *
 
 drop_cols = ['parcelid','logerror']  # 'latitude', 'longitude']
 one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid']
@@ -24,7 +25,9 @@ def get_features(df):
     df = df.drop('transactiondate', axis=1)
 
     df.fillna(df.mean())
+
     return df
+
 
 def chunks(l, n):
     """Yield successive n-sized chunks from l."""
@@ -82,7 +85,7 @@ del x_train, x_valid; gc.collect()
 
 print('Training ...')
 
-params = {'eta': 0.02, 'objective': 'reg:linear', 'eval_metric': 'mae', 'min_child_weight': 1,  'max_depth': 7, 'subsample':0.8, 'lambda':0.8, 'alpha':0.4, 'silent': 1}
+params = {'eta': 0.02, 'objective': 'reg:linear', 'eval_metric': 'mae', 'min_child_weight': 1, 'colsample_bytree': 0.2, 'max_depth': 7, 'lambda': 0.3, 'alpha': 0.6, 'silent': 1}
 print(params)
 
 watchlist = [(d_train, 'train'), (d_valid, 'valid')]
