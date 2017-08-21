@@ -1,6 +1,7 @@
 import pandas as pd
 import math
 from math import radians, cos, sin, asin, sqrt
+from sklearn.cluster import MiniBatchKMeans
 
 
 def haversine(lon1, lat1, lon2, lat2):
@@ -31,7 +32,7 @@ def building_num(la, lo, n, buildings):
 
 def prepare_data():
     prop = pd.read_csv('../data/properties_2016.csv')
-    train = pd.read_csv('../data/train_2016_v2.csv')
+    train = pd.read_csv('../data/train_2016_v2.csv').fillna(-1)
     df_train = train.merge(prop, how='left', on='parcelid')
 
     df_geo = prop[['latitude', 'longitude', 'parcelid']]
@@ -40,13 +41,21 @@ def prepare_data():
     df_geo['latitude'] /= 1e6
     df_geo['longitude'] /= 1e6
 
+    kmeans = MiniBatchKMeans(n_clusters=300, batch_size=1000).fit(df_geo[['latitude', 'longitude']])
+    df_geo.loc[:, 'loc_label'] = kmeans.labels_
+
     building_la = list(df_geo.latitude)
     building_lo = list(df_geo.longitude)
     buildings = zip(building_la, building_lo)
+    sale_buildings = zip(list(df_train.latitude), list(df_train.longitude))
 
-    df_train['loc_building_num'] = map(lambda la, lo: building_num(la, lo, 1000, buildings), df_train['latitdue'], df_train['logitude'])
+    ''' 
+    df_train['loc_building_num'] = map(lambda la, lo: building_num(la/1e6, lo/1e6, 1000, buildings), df_train['latitude'], df_train['longitude'])
+    df_train['loc_sale_num'] = map(lambda la, lo: building_num(la/1e6, lo/1e6, 1000, sale_buildings), df_train['latitude'], df_train['longitude'])
+    df_train['loc_sale_rt'] = df_train['loc_sale_num'] / df_train['loc_building_num']
+    '''
 
-    df_train[['parcelid', 'loc_building_num']].to_csv('../data/location_2016.csv', index=None)
+    df_geo[['parcelid', 'loc_label']].to_csv('../data/location_2016.csv', index=None)
 
 
 prepare_data()

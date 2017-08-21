@@ -145,7 +145,7 @@ for c in sub.columns[sub.columns != 'ParcelId']:
 del prop, sample; gc.collect()
 
 print('Writing csv ...')
-file_path = '../../data/xgb' + datetime.now().strftime("%m_%d_%H_%M_%S")
+file_path = '../../data/xgb' + datetime.now().strftime("%m_%d_%H_%M_%S")+'.csv'
 sub.to_csv(file_path, index=False, float_format='%.4f')
 
 # #1 0.0645657  [270]	train-mae:0.052583	valid-mae:0.051849
@@ -158,5 +158,7 @@ sub.to_csv(file_path, index=False, float_format='%.4f')
 # add coordinate feature, remove weekday feature, just predict 20171201 for speed.
 
 # [303]	train-mae:0.067442	valid-mae:0.066382
+
+# 0.0644440 back to the start point, only change the validation set.
 
 # Thanks to @inversion

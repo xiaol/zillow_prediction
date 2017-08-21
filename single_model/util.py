@@ -59,16 +59,16 @@ def merge_std(df,columns,value,cname):
     return df
 
 
-def get_stats(train_df, test_df, target_column, group_column = 'manager_id'):
-    '''
+def get_stats(train_df, test_df, target_column, group_column='loc_label'):
+    """
     target_column: numeric columns to group with (e.g. price, bedrooms, bathrooms)
     group_column: categorical columns to group on (e.g. manager_id, building_id)
-    '''
+    """
     train_df['row_id'] = range(train_df.shape[0])
     test_df['row_id'] = range(test_df.shape[0])
     train_df['train'] = 1
     test_df['train'] = 0
-    all_df = train_df[['row_id', 'train', target_column, group_column]].append(test_df[['row_id','train',
+    all_df = train_df[['row_id', 'train', target_column, group_column]].append(test_df[['row_id', 'train',
                                                                                         target_column, group_column]])
     grouped = all_df[[target_column, group_column]].groupby(group_column)
     the_size = pd.DataFrame(grouped.size()).reset_index()
