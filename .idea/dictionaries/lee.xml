@@ -2,6 +2,7 @@
   <dictionary name="lee">
     <words>
       <w>haversine</w>
+      <w>kmeans</w>
     </words>
   </dictionary>
 </component>

@@ -1,4 +1,4 @@
-
+#encoding=utf8
 import numpy as np
 import pandas as pd
 import xgboost as xgb
@@ -9,6 +9,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from util import *
+from sklearn.cluster import MiniBatchKMeans
 
 drop_cols = ['parcelid','logerror']  # 'latitude', 'longitude']
 one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid']
@@ -27,7 +28,10 @@ def get_features(df):
 
     df = df.drop('transactiondate', axis=1)
 
-    df.fillna(df.mean())
+    df.fillna(-1)
+
+    # 商圈内待售房屋数量
+    df = merge_nunique(df, ['loc_label'], 'parcelid', 'loc_building_num')
 
     return df
 
@@ -40,7 +44,7 @@ def chunks(l, n):
 print('Loading data ...')
 
 train = pd.read_csv('../../data/train_2016_v2.csv')
-prop = pd.read_csv('../../data/properties_2016.csv')
+prop = pd.read_csv('../../data/properties_2016.csv')  # , nrows=500)
 sample = pd.read_csv('../../data/sample_submission.csv')
 
 print('Binding to float32')
@@ -56,16 +60,21 @@ print(split)
 
 train = train[train.logerror > -0.4]
 train = train[train.logerror < 0.419]
+
+
+kmeans = MiniBatchKMeans(n_clusters=300, batch_size=1000).fit(prop[['latitude', 'longitude']])
+prop.loc[:, 'loc_label'] = kmeans.labels_
+
 df_train = train.merge(prop, how='left', on='parcelid')
 
 # drop outliers
 # df_train = df_train[df_train.logerror > -0.4]
 # df_train = df_train[df_train.logerror < 0.419]
 
-
-x_train = df_train.drop(drop_cols, axis=1)
+x_train = df_train
 x_train = prepare_data(x_train, one_hot_encode_cols)
 x_train = get_features(x_train)
+x_train = df_train.drop(drop_cols, axis=1)
 
 train_columns = x_train.columns
 
@@ -88,7 +97,7 @@ del x_train, x_valid; gc.collect()
 
 print('Training ...')
 
-params = {'eta': 0.015, 'objective': 'reg:linear', 'eval_metric': 'mae', 'min_child_weight': 1, 'colsample_bytree': 0.2, 'max_depth': 9, 'lambda': 0.3, 'alpha': 0.6, 'silent': 1}
+params = {'eta': 0.015, 'objective': 'reg:linear', 'eval_metric': 'mae', 'min_child_weight': 1.5, 'colsample_bytree': 0.2, 'max_depth': 8, 'lambda': 0.3, 'alpha': 0.6, 'silent': 1}
 print(params)
 
 watchlist = [(d_train, 'train'), (d_valid, 'valid')]
@@ -159,6 +168,7 @@ sub.to_csv(file_path, index=False, float_format='%.4f')
 
 # [303]	train-mae:0.067442	valid-mae:0.066382
 
-# 0.0644440 back to the start point, only change the validation set.
+# 0.0644440 back to the start point, only change the validation set. [476]   train-mae:0.050504      valid-mae:0.052248
+
 
 # Thanks to @inversion
