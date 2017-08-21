@@ -6,6 +6,7 @@ import gc
 from datetime import datetime
 from sklearn.preprocessing import OneHotEncoder
 # from util import *
+import sys
 
 drop_cols = ['parcelid','logerror']  # 'latitude', 'longitude']
 one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid']
@@ -85,7 +86,7 @@ del x_train, x_valid; gc.collect()
 
 print('Training ...')
 
-params = {'eta': 0.02, 'objective': 'reg:linear', 'eval_metric': 'mae', 'min_child_weight': 1, 'colsample_bytree': 0.2, 'max_depth': 10, 'lambda': 0.3, 'alpha': 0.6, 'silent': 1}
+params = {'eta': 0.015, 'objective': 'reg:linear', 'eval_metric': 'mae', 'min_child_weight': 1, 'colsample_bytree': 0.2, 'max_depth': 9, 'lambda': 0.3, 'alpha': 0.6, 'silent': 1}
 print(params)
 
 watchlist = [(d_train, 'train'), (d_valid, 'valid')]
@@ -108,6 +109,9 @@ for c in sub.columns[sub.columns != 'ParcelId']:
     p_test = np.array([])
 
     for fold in chunks(sample, 80000):
+        sys.stdout.write('.')
+        sys.stdout.flush()
+
         df_test_fold = fold.merge(prop, on='parcelid', how='left')
         x_test_fold = prepare_data(df_test_fold, one_hot_encode_cols)
         transactiondate = c[:4] + '-' + c[4:] +'-01'
@@ -132,7 +136,7 @@ for c in sub.columns[sub.columns != 'ParcelId']:
         del d_test_cks; gc.collect()
         del df_test_fold, x_test_fold; gc.collect()
 
-    print('Completed one test column')
+    print(c)
 
     sub[c] = p_test
 
