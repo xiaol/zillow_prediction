@@ -10,6 +10,8 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from util import *
 from sklearn.cluster import MiniBatchKMeans
+import matplotlib
+matplotlib.use('pdf')
 import matplotlib.pyplot as plt
 
 drop_cols = ['parcelid', 'logerror']
@@ -121,8 +123,8 @@ print(params)
 watchlist = [(d_train, 'train'), (d_valid, 'valid')]
 clf = xgb.train(params, d_train, 10000, watchlist, early_stopping_rounds=100, verbose_eval=10)
 
-# xgb.plot_importance(clf)
-# plt.savefig('../../data/importance.png')
+xgb.plot_importance(clf)
+plt.savefig('../../data/importance.pdf')
 del d_train, d_valid
 
 print('Building test set ...')
