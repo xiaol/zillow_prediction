@@ -50,7 +50,7 @@ def get_features(df):
     for col in ['finishedsquarefeet6', 'finishedsquarefeet12', 'finishedsquarefeet13', 'finishedsquarefeet15',
                 'finishedsquarefeet50', 'garagetotalsqft', 'lotsizesquarefeet', 'yardbuildingsqft17', 'yardbuildingsqft26',
                 'taxamount', 'taxvaluedollarcnt', 'landtaxvaluedollarcnt', 'structuretaxvaluedollarcnt', 'yearbuilt',
-                'basementsqft', 'finishedfloor1squarefeet', 'calculatedfinishedsquarefeet', 'taxamount','structuretaxvaluedollarcnt', 'landtaxvaluedollarcnt']:
+                'basementsqft', 'finishedfloor1squarefeet', 'calculatedfinishedsquarefeet', ]:
         df = merge_mean(df, ['loc_label'], col, 'loc_'+col+'_mean')
 
     return df
