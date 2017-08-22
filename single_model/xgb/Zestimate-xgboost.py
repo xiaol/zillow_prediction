@@ -121,8 +121,8 @@ print(params)
 watchlist = [(d_train, 'train'), (d_valid, 'valid')]
 clf = xgb.train(params, d_train, 10000, watchlist, early_stopping_rounds=100, verbose_eval=10)
 
-xgb.plot_importance(clf)
-plt.savefig('../../data/importance.png')
+# xgb.plot_importance(clf)
+# plt.savefig('../../data/importance.png')
 del d_train, d_valid
 
 print('Building test set ...')
