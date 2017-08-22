@@ -43,14 +43,15 @@ def get_features(df):
     df = merge_nunique(df, ['regionidcity'], 'parcelid', 'city_property_num')
     df = merge_nunique(df, ['regionidcounty'], 'parcelid', 'county_property_num')
 
+    df = merge_nunique(df, ['transaction_month'], 'parcelid', 'month_transaction_count')
     # 商圈房屋状况均值
     df = merge_median(df, ['loc_label'], 'buildingqualitytypeid', 'loc_quality_median')
 
     for col in ['finishedsquarefeet6', 'finishedsquarefeet12', 'finishedsquarefeet13', 'finishedsquarefeet15',
                 'finishedsquarefeet50', 'garagetotalsqft', 'lotsizesquarefeet', 'yardbuildingsqft17', 'yardbuildingsqft26',
                 'taxamount', 'taxvaluedollarcnt', 'landtaxvaluedollarcnt', 'structuretaxvaluedollarcnt', 'yearbuilt',
-                'basementsqft', 'finishedfloor1squarefeet', 'calculatedfinishedsquarefeet', 'tax_rt', 'taxamount',
-                'structure_tax_rt', 'land_tax_rt', 'structuretaxvaluedollarcnt', 'landtaxvaluedollarcnt']:
+                'basementsqft', 'finishedfloor1squarefeet', 'calculatedfinishedsquarefeet', 'taxamount',
+                'structuretaxvaluedollarcnt', 'landtaxvaluedollarcnt']:
         df = merge_mean(df, ['loc_label'], col, 'loc_'+col+'_mean')
 
     return df
@@ -82,7 +83,7 @@ train = train[train.logerror > -0.4]
 train = train[train.logerror < 0.419]
 
 
-kmeans = MiniBatchKMeans(n_clusters=250, batch_size=1000).fit(prop[['latitude', 'longitude']])
+kmeans = MiniBatchKMeans(n_clusters=300, batch_size=1000).fit(prop[['latitude', 'longitude']])
 prop.loc[:, 'loc_label'] = kmeans.labels_
 
 df_train = train.merge(prop, how='left', on='parcelid')
@@ -100,7 +101,7 @@ train_columns = x_train.columns
 
 y_train = df_train['logerror'].values
 print(x_train.shape, y_train.shape)
-print x_train.columns
+print x_train.column
 pd.Series(list(x_train.columns)).to_csv('../../data/columns.csv')
 
 
