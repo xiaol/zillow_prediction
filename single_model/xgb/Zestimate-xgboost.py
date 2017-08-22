@@ -114,13 +114,14 @@ del x_train, x_valid; gc.collect()
 
 print('Training ...')
 
-params = {'eta': 0.02, 'objective': 'reg:linear', 'eval_metric': 'mae', 'min_child_weight': 1, 'colsample_bytree': 0.2, 'max_depth': 7, 'lambda': 0.3, 'alpha': 0.6, 'silent': 1}
+params = {'eta': 0.015, 'objective': 'reg:linear', 'eval_metric': 'mae', 'min_child_weight': 1, 'colsample_bytree': 0.2, 'max_depth': 7, 'lambda': 0.3, 'alpha': 0.6, 'silent': 1}
 print(params)
 
 watchlist = [(d_train, 'train'), (d_valid, 'valid')]
 clf = xgb.train(params, d_train, 10000, watchlist, early_stopping_rounds=100, verbose_eval=10)
 
-#xgb.plot_importance(clf)
+xgb.plot_importance(clf)
+
 del d_train, d_valid
 
 print('Building test set ...')
