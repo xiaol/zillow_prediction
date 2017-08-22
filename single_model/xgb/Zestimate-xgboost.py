@@ -49,7 +49,8 @@ def get_features(df):
     for col in ['finishedsquarefeet6', 'finishedsquarefeet12', 'finishedsquarefeet13', 'finishedsquarefeet15',
                 'finishedsquarefeet50', 'garagetotalsqft', 'lotsizesquarefeet', 'yardbuildingsqft17', 'yardbuildingsqft26',
                 'taxamount', 'taxvaluedollarcnt', 'landtaxvaluedollarcnt', 'structuretaxvaluedollarcnt', 'yearbuilt',
-                'basementsqft', 'finishedfloor1squarefeet', 'calculatedfinishedsquarefeet']:
+                'basementsqft', 'finishedfloor1squarefeet', 'calculatedfinishedsquarefeet', 'tax_rt', 'taxamount',
+                'structure_tax_rt', 'land_tax_rt', 'structuretaxvaluedollarcnt', 'landtaxvaluedollarcnt']:
         df = merge_mean(df, ['loc_label'], col, 'loc_'+col+'_mean')
 
     return df
@@ -81,7 +82,7 @@ train = train[train.logerror > -0.4]
 train = train[train.logerror < 0.419]
 
 
-kmeans = MiniBatchKMeans(n_clusters=320, batch_size=1000).fit(prop[['latitude', 'longitude']])
+kmeans = MiniBatchKMeans(n_clusters=300, batch_size=1000).fit(prop[['latitude', 'longitude']])
 prop.loc[:, 'loc_label'] = kmeans.labels_
 
 df_train = train.merge(prop, how='left', on='parcelid')
