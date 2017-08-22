@@ -32,6 +32,11 @@ def get_features(df):
     df = df.drop('transactiondate', axis=1)
     df['life'] = 2018 - df['yearbuilt']
 
+    df['extra_bathroom_cnt'] = df['bathroomcnt'] - df['bedroomcnt']
+    df['tax_rt'] = df['taxamount'] / df['taxvaluedollarcnt']
+    df['structure_tax_rt'] = df['structuretaxvaluedollarcnt'] / df['taxvaluedollarcnt']
+    df['land_tax_rt'] = df['landtaxvaluedollarcnt'] / df['taxvaluedollarcnt']
+
     # 商圈内待售房屋数量
     df = merge_nunique(df, ['loc_label'], 'parcelid', 'loc_building_num')
     df = merge_nunique(df, ['regionidzip'], 'parcelid', 'region_property_num')
@@ -46,11 +51,6 @@ def get_features(df):
                 'taxamount', 'taxvaluedollarcnt', 'landtaxvaluedollarcnt', 'structuretaxvaluedollarcnt', 'yearbuilt',
                 'basementsqft', 'finishedfloor1squarefeet', 'calculatedfinishedsquarefeet']:
         df = merge_mean(df, ['loc_label'], col, 'loc_'+col+'_mean')
-
-    df['extra_bathroom_cnt'] = df['bathroomcnt'] - df['bedroomcnt']
-    df['tax_rt'] = df['taxamount']/df['taxvaluedollarcnt']
-    df['structure_tax_rt'] = df['structuretaxvaluedollarcnt']/df['taxvaluedollarcnt']
-    df['land_tax_rt'] = df['landtaxvaluedollarcnt']/df['taxvaluedollarcnt']
 
     return df
 
@@ -81,7 +81,7 @@ train = train[train.logerror > -0.4]
 train = train[train.logerror < 0.419]
 
 
-kmeans = MiniBatchKMeans(n_clusters=300, batch_size=1000).fit(prop[['latitude', 'longitude']])
+kmeans = MiniBatchKMeans(n_clusters=320, batch_size=1000).fit(prop[['latitude', 'longitude']])
 prop.loc[:, 'loc_label'] = kmeans.labels_
 
 df_train = train.merge(prop, how='left', on='parcelid')
