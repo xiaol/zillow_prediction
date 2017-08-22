@@ -33,9 +33,10 @@ def get_features(df):
     df['life'] = 2018 - df['yearbuilt']
 
     df['extra_bathroom_cnt'] = df['bathroomcnt'] - df['bedroomcnt']
-    # df['tax_rt'] = df['taxamount'] / df['taxvaluedollarcnt']
-    # df['structure_tax_rt'] = df['structuretaxvaluedollarcnt'] / df['taxvaluedollarcnt']
-    # df['land_tax_rt'] = df['landtaxvaluedollarcnt'] / df['taxvaluedollarcnt']
+    df['room_sqt'] = df['calculatedfinishedsquarefeet']/df['roomcnt']
+    df['tax_rt'] = df['taxamount'] / df['taxvaluedollarcnt']
+    df['structure_tax_rt'] = df['structuretaxvaluedollarcnt'] / df['taxvaluedollarcnt']
+    df['land_tax_rt'] = df['landtaxvaluedollarcnt'] / df['taxvaluedollarcnt']
 
     # 商圈内待售房屋数量
     df = merge_nunique(df, ['loc_label'], 'parcelid', 'loc_building_num')
@@ -46,11 +47,9 @@ def get_features(df):
     # df = merge_nunique(df, ['transaction_month'], 'parcelid', 'month_transaction_count')
     # 商圈房屋状况均值
     df = merge_median(df, ['loc_label'], 'buildingqualitytypeid', 'loc_quality_median')
-
     for col in ['finishedsquarefeet6', 'finishedsquarefeet12', 'finishedsquarefeet13', 'finishedsquarefeet15',
                 'finishedsquarefeet50', 'garagetotalsqft', 'lotsizesquarefeet', 'yardbuildingsqft17', 'yardbuildingsqft26',
-                'taxamount', 'taxvaluedollarcnt', 'landtaxvaluedollarcnt', 'structuretaxvaluedollarcnt', 'yearbuilt',
-                'basementsqft', 'finishedfloor1squarefeet', 'calculatedfinishedsquarefeet' ]:
+                'basementsqft', 'finishedfloor1squarefeet', 'calculatedfinishedsquarefeet']:
         df = merge_mean(df, ['loc_label'], col, 'loc_'+col+'_mean')
 
     return df
@@ -78,18 +77,14 @@ train = train[train.transactiondate < '2017-01-01']
 split = train[train.transactiondate < '2016-10-01'].shape[0]
 print(split)
 
-train = train[train.logerror > -0.4]
-train = train[train.logerror < 0.419]
+# train = train[train.logerror > -0.4]
+# train = train[train.logerror < 0.419]
 
 
 kmeans = MiniBatchKMeans(n_clusters=300, batch_size=1000).fit(prop[['latitude', 'longitude']])
 prop.loc[:, 'loc_label'] = kmeans.labels_
 
 df_train = train.merge(prop, how='left', on='parcelid')
-
-# drop outliers
-# df_train = df_train[df_train.logerror > -0.4]
-# df_train = df_train[df_train.logerror < 0.419]
 
 x_train = df_train
 x_train = get_features(x_train)
