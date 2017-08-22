@@ -11,7 +11,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from util import *
 from sklearn.cluster import MiniBatchKMeans
 
-drop_cols = ['parcelid','logerror']  # 'latitude', 'longitude']
+drop_cols = ['parcelid', 'logerror']
 one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid']
 
 
@@ -28,13 +28,26 @@ def get_features(df):
 
     df = df.drop('transactiondate', axis=1)
 
-    df.fillna(-0.001)
-
     # 商圈内待售房屋数量
     df = merge_nunique(df, ['loc_label'], 'parcelid', 'loc_building_num')
+    df = merge_nunique(df, ['regionidzip'], 'parcelid', 'region_property_num')
+    df = merge_nunique(df, ['regionidcity'], 'parcelid', 'city_property_num')
+    df = merge_nunique(df, ['regionidcounty'], 'parcelid', 'county_property_num')
 
     # 商圈房屋状况均值
     df = merge_median(df, ['loc_label'], 'buildingqualitytypeid', 'loc_quality_median')
+
+    # 商圈
+    df = merge_mean(df, ['loc_label'], 'basementsqft', 'loc_basementsqft_mean')
+    df = merge_mean(df, ['loc_label'], 'finishedfloor1squarefeet', 'loc_finishedfloor1sqft_mean')
+    df = merge_mean(df, ['loc_label'], 'calculatedfinishedsquarefeet', 'loc_calculatedfinishedsqft_mean')
+
+    for col in ['finishedsquarefeet6', 'finishedsquarefeet12', 'finishedsquarefeet13', 'finishedsquarefeet15',
+                'finishedsquarefeet50', 'garagetotalsqft', 'lotsizesquarefeet', 'yardbuildingsqft17', 'yardbuildingsqft26']:
+        df = merge_mean(df, ['loc_label'], col, 'loc_'+col+'_mean')
+
+    df['life'] = 2018 - df['yearbuilt']
+    df['extra_bathroom_cnt'] = df['bathroomcnt'] - df['bedroomcnt']
 
     return df
 
@@ -75,15 +88,15 @@ df_train = train.merge(prop, how='left', on='parcelid')
 # df_train = df_train[df_train.logerror < 0.419]
 
 x_train = df_train
-x_train = prepare_data(x_train, one_hot_encode_cols)
 x_train = get_features(x_train)
+x_train = prepare_data(x_train, one_hot_encode_cols)
 x_train = x_train.drop(drop_cols, axis=1)
 
 train_columns = x_train.columns
 
 y_train = df_train['logerror'].values
 print(x_train.shape, y_train.shape)
-print x_train.dtypes
+print x_train.columns
 
 
 del df_train; gc.collect()
@@ -100,7 +113,7 @@ del x_train, x_valid; gc.collect()
 
 print('Training ...')
 
-params = {'eta': 0.015, 'objective': 'reg:linear', 'eval_metric': 'mae', 'min_child_weight': 1.5, 'colsample_bytree': 0.2, 'max_depth': 7, 'lambda': 0.3, 'alpha': 0.6, 'silent': 1}
+params = {'eta': 0.015, 'objective': 'reg:linear', 'eval_metric': 'mae', 'min_child_weight': 1.5, 'colsample_bytree': 0.2, 'max_depth': 6, 'lambda': 0.3, 'alpha': 0.6, 'silent': 1}
 print(params)
 
 watchlist = [(d_train, 'train'), (d_valid, 'valid')]
@@ -173,5 +186,5 @@ sub.to_csv(file_path, index=False, float_format='%.4f')
 
 # 0.0644440 back to the start point, only change the validation set. [476]   train-mae:0.050504      valid-mae:0.052248
 
-
+# 0.0644258 add loc_label , loc_quality_median, loc_building_num  [485]   train-mae:0.051334      valid-mae:0.052187
 # Thanks to @inversion
