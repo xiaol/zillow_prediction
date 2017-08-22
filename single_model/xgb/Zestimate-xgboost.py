@@ -113,7 +113,7 @@ del x_train, x_valid; gc.collect()
 
 print('Training ...')
 
-params = {'eta': 0.015, 'objective': 'reg:linear', 'eval_metric': 'mae', 'min_child_weight': 1, 'colsample_bytree': 0.7, 'max_depth': 0, 'lambda': 0.3, 'alpha': 0.6, 'silent': 1}
+params = {'eta': 0.02, 'objective': 'reg:linear', 'eval_metric': 'mae', 'min_child_weight': 1, 'colsample_bytree': 0.7, 'max_depth': 7, 'lambda': 0.3, 'alpha': 0.6, 'silent': 1}
 print(params)
 
 watchlist = [(d_train, 'train'), (d_valid, 'valid')]
@@ -140,11 +140,13 @@ for c in sub.columns[sub.columns != 'ParcelId']:
         sys.stdout.flush()
 
         df_test_fold = fold.merge(prop, on='parcelid', how='left')
-        x_test_fold = get_features(df_test_fold)
-        x_test_fold = prepare_data(x_test_fold, one_hot_encode_cols)
+
         transactiondate = c[:4] + '-' + c[4:] +'-01'
+        df_test_fold['transactiondate'] = transactiondate
+        x_test_fold = get_features(df_test_fold)
+
+        x_test_fold = prepare_data(x_test_fold, one_hot_encode_cols)
         # transactiondate = '2017-12-01'
-        x_test_fold['transactiondate'] = transactiondate
 
         sub_cols = set(train_columns).intersection(set(x_test_fold.columns))
         x_test_fold = x_test_fold[list(sub_cols)]
