@@ -123,7 +123,8 @@ print(params)
 watchlist = [(d_train, 'train'), (d_valid, 'valid')]
 clf = xgb.train(params, d_train, 10000, watchlist, early_stopping_rounds=100, verbose_eval=10)
 
-xgb.plot_importance(clf)
+fig, ax = plt.subplots(figsize=(12,18))
+xgb.plot_importance(clf, max_num_features=80, height=0.8, ax=ax)
 plt.savefig('../../data/importance.pdf')
 del d_train, d_valid
 
