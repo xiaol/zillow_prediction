@@ -30,6 +30,7 @@ def get_features(df):
     df['transaction_day'] = df['transactiondate'].dt.weekday.astype(np.int8)
 
     df = df.drop('transactiondate', axis=1)
+    df['life'] = 2018 - df['yearbuilt']
 
     # 商圈内待售房屋数量
     df = merge_nunique(df, ['loc_label'], 'parcelid', 'loc_building_num')
@@ -40,16 +41,13 @@ def get_features(df):
     # 商圈房屋状况均值
     df = merge_median(df, ['loc_label'], 'buildingqualitytypeid', 'loc_quality_median')
 
-    # 商圈
-    df = merge_mean(df, ['loc_label'], 'basementsqft', 'loc_basementsqft_mean')
-    df = merge_mean(df, ['loc_label'], 'finishedfloor1squarefeet', 'loc_finishedfloor1sqft_mean')
-    df = merge_mean(df, ['loc_label'], 'calculatedfinishedsquarefeet', 'loc_calculatedfinishedsqft_mean')
-
     for col in ['finishedsquarefeet6', 'finishedsquarefeet12', 'finishedsquarefeet13', 'finishedsquarefeet15',
-                'finishedsquarefeet50', 'garagetotalsqft', 'lotsizesquarefeet', 'yardbuildingsqft17', 'yardbuildingsqft26']:
+                'finishedsquarefeet50', 'garagetotalsqft', 'lotsizesquarefeet', 'yardbuildingsqft17', 'yardbuildingsqft26',
+                'taxamount', 'taxvaluedollarcnt', 'landtaxvaluedollarcnt', 'structuretaxvaluedollarcnt', 'yearbuilt',
+                'basementsqft', 'finishedfloor1squarefeet', 'calculatedfinishedsquarefeet']:
         df = merge_mean(df, ['loc_label'], col, 'loc_'+col+'_mean')
 
-    df['life'] = 2018 - df['yearbuilt']
+
     df['extra_bathroom_cnt'] = df['bathroomcnt'] - df['bedroomcnt']
 
     return df
