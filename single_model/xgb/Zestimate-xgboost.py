@@ -78,7 +78,7 @@ train = train[train.logerror > -0.4]
 train = train[train.logerror < 0.419]
 
 
-kmeans = MiniBatchKMeans(n_clusters=300, batch_size=1000).fit(prop[['latitude', 'longitude']])
+kmeans = MiniBatchKMeans(n_clusters=600, batch_size=1000).fit(prop[['latitude', 'longitude']])
 prop.loc[:, 'loc_label'] = kmeans.labels_
 
 df_train = train.merge(prop, how='left', on='parcelid')
@@ -117,7 +117,7 @@ watchlist = [(d_train, 'train'), (d_valid, 'valid')]
 clf = xgb.train(params, d_train, 10000, watchlist, early_stopping_rounds=100, verbose_eval=10)
 
 fig, ax = plt.subplots(figsize=(12,18))
-xgb.plot_importance(clf, max_num_features=80, height=0.8, ax=ax)
+xgb.plot_importance(clf, max_num_features=200, height=0.8, ax=ax)
 plt.savefig('../../data/importance.pdf')
 del d_train, d_valid
 
