@@ -43,7 +43,7 @@ def get_features(df):
     df = merge_nunique(df, ['regionidcity'], 'parcelid', 'city_property_num')
     df = merge_nunique(df, ['regionidcounty'], 'parcelid', 'county_property_num')
 
-    df = merge_nunique(df, ['transaction_month'], 'parcelid', 'month_transaction_count')
+    # df = merge_nunique(df, ['transaction_month'], 'parcelid', 'month_transaction_count')
     # 商圈房屋状况均值
     df = merge_median(df, ['loc_label'], 'buildingqualitytypeid', 'loc_quality_median')
 
