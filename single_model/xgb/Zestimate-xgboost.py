@@ -96,7 +96,8 @@ train_columns = x_train.columns
 
 y_train = df_train['logerror'].values
 print(x_train.shape, y_train.shape)
-print list(x_train.columns)
+print x_train.columns
+pd.Series(list(x_train.columns)).to_csv('../../data/columns.csv')
 
 
 del df_train; gc.collect()
@@ -113,7 +114,7 @@ del x_train, x_valid; gc.collect()
 
 print('Training ...')
 
-params = {'eta': 0.02, 'objective': 'reg:linear', 'eval_metric': 'mae', 'min_child_weight': 1, 'colsample_bytree': 0.7, 'max_depth': 7, 'lambda': 0.3, 'alpha': 0.6, 'silent': 1}
+params = {'eta': 0.02, 'objective': 'reg:linear', 'eval_metric': 'mae', 'min_child_weight': 1, 'colsample_bytree': 0.2, 'max_depth': 7, 'lambda': 0.3, 'alpha': 0.6, 'silent': 1}
 print(params)
 
 watchlist = [(d_train, 'train'), (d_valid, 'valid')]
