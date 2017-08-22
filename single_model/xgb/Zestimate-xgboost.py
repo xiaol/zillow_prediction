@@ -30,7 +30,6 @@ def get_features(df):
     df['transaction_day'] = df['transactiondate'].dt.weekday.astype(np.int8)
 
     df = df.drop('transactiondate', axis=1)
-    df['life'] = 2018 - df['yearbuilt']
 
     df['extra_bathroom_cnt'] = df['bathroomcnt'] - df['bedroomcnt']
     df['room_sqt'] = df['calculatedfinishedsquarefeet']/df['roomcnt']
@@ -44,13 +43,11 @@ def get_features(df):
     df = merge_nunique(df, ['regionidcity'], 'parcelid', 'city_property_num')
     df = merge_nunique(df, ['regionidcounty'], 'parcelid', 'county_property_num')
 
-    # df = merge_nunique(df, ['transaction_month'], 'parcelid', 'month_transaction_count')
+    df = merge_nunique(df, ['loc_label'], 'transaction_month', 'loc_month_transaction_count')
     # 商圈房屋状况均值
     df = merge_median(df, ['loc_label'], 'buildingqualitytypeid', 'loc_quality_median')
-    for col in ['finishedsquarefeet6', 'finishedsquarefeet12', 'finishedsquarefeet13', 'finishedsquarefeet15',
-                'finishedsquarefeet50', 'garagetotalsqft', 'lotsizesquarefeet', 'yardbuildingsqft17', 'yardbuildingsqft26',
-                'basementsqft', 'finishedfloor1squarefeet', 'calculatedfinishedsquarefeet']:
-        df = merge_mean(df, ['loc_label'], col, 'loc_'+col+'_mean')
+    for col in ['finishedsquarefeet12', 'garagetotalsqft', 'yearbuilt', 'calculatedfinishedsquarefeet', 'lotsizesquarefeet']:
+        df = merge_median(df, ['loc_label'], col, 'loc_'+col+'_median')
 
     return df
 
@@ -77,8 +74,8 @@ train = train[train.transactiondate < '2017-01-01']
 split = train[train.transactiondate < '2016-10-01'].shape[0]
 print(split)
 
-# train = train[train.logerror > -0.4]
-# train = train[train.logerror < 0.419]
+train = train[train.logerror > -0.4]
+train = train[train.logerror < 0.419]
 
 
 kmeans = MiniBatchKMeans(n_clusters=300, batch_size=1000).fit(prop[['latitude', 'longitude']])
