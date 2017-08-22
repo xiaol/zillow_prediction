@@ -33,9 +33,9 @@ def get_features(df):
     df['life'] = 2018 - df['yearbuilt']
 
     df['extra_bathroom_cnt'] = df['bathroomcnt'] - df['bedroomcnt']
-    df['tax_rt'] = df['taxamount'] / df['taxvaluedollarcnt']
-    df['structure_tax_rt'] = df['structuretaxvaluedollarcnt'] / df['taxvaluedollarcnt']
-    df['land_tax_rt'] = df['landtaxvaluedollarcnt'] / df['taxvaluedollarcnt']
+    # df['tax_rt'] = df['taxamount'] / df['taxvaluedollarcnt']
+    # df['structure_tax_rt'] = df['structuretaxvaluedollarcnt'] / df['taxvaluedollarcnt']
+    # df['land_tax_rt'] = df['landtaxvaluedollarcnt'] / df['taxvaluedollarcnt']
 
     # 商圈内待售房屋数量
     df = merge_nunique(df, ['loc_label'], 'parcelid', 'loc_building_num')
@@ -50,7 +50,7 @@ def get_features(df):
     for col in ['finishedsquarefeet6', 'finishedsquarefeet12', 'finishedsquarefeet13', 'finishedsquarefeet15',
                 'finishedsquarefeet50', 'garagetotalsqft', 'lotsizesquarefeet', 'yardbuildingsqft17', 'yardbuildingsqft26',
                 'taxamount', 'taxvaluedollarcnt', 'landtaxvaluedollarcnt', 'structuretaxvaluedollarcnt', 'yearbuilt',
-                'basementsqft', 'finishedfloor1squarefeet', 'calculatedfinishedsquarefeet', ]:
+                'basementsqft', 'finishedfloor1squarefeet', 'calculatedfinishedsquarefeet' ]:
         df = merge_mean(df, ['loc_label'], col, 'loc_'+col+'_mean')
 
     return df
