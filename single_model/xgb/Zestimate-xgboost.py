@@ -101,7 +101,7 @@ train_columns = x_train.columns
 
 y_train = df_train['logerror'].values
 print(x_train.shape, y_train.shape)
-print x_train.column
+print x_train.columns
 pd.Series(list(x_train.columns)).to_csv('../../data/columns.csv')
 
 
