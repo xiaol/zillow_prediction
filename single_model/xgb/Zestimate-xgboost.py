@@ -83,7 +83,7 @@ train = train[train.logerror > -0.4]
 train = train[train.logerror < 0.419]
 
 
-kmeans = MiniBatchKMeans(n_clusters=600, batch_size=1000).fit(prop[['latitude', 'longitude']])
+kmeans = MiniBatchKMeans(n_clusters=300, batch_size=1000).fit(prop[['latitude', 'longitude']])
 prop.loc[:, 'loc_label'] = kmeans.labels_
 
 df_train = train.merge(prop, how='left', on='parcelid')
