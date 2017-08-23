@@ -15,7 +15,7 @@ matplotlib.use('pdf')
 import matplotlib.pyplot as plt
 
 drop_cols = ['parcelid', 'logerror']
-one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid']
+one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid', 'fips']
 
 
 def prepare_data(df, columns):
@@ -31,23 +31,28 @@ def get_features(df):
 
     df = df.drop('transactiondate', axis=1)
 
+    '''
     df['extra_bathroom_cnt'] = df['bathroomcnt'] - df['bedroomcnt']
     df['room_sqt'] = df['calculatedfinishedsquarefeet']/df['roomcnt']
     df['tax_rt'] = df['taxamount'] / df['taxvaluedollarcnt']
     df['structure_tax_rt'] = df['structuretaxvaluedollarcnt'] / df['taxvaluedollarcnt']
     df['land_tax_rt'] = df['landtaxvaluedollarcnt'] / df['taxvaluedollarcnt']
+    '''
 
     # 商圈内待售房屋数量
     df = merge_nunique(df, ['loc_label'], 'parcelid', 'loc_building_num')
+    '''
     df = merge_nunique(df, ['regionidzip'], 'parcelid', 'region_property_num')
     df = merge_nunique(df, ['regionidcity'], 'parcelid', 'city_property_num')
     df = merge_nunique(df, ['regionidcounty'], 'parcelid', 'county_property_num')
-
-    df = merge_nunique(df, ['loc_label'], 'transaction_month', 'loc_month_transaction_count')
+    '''
+    # df = merge_nunique(df, ['loc_label'], 'transaction_month', 'loc_month_transaction_count')
     # 商圈房屋状况均值
     df = merge_median(df, ['loc_label'], 'buildingqualitytypeid', 'loc_quality_median')
+    '''
     for col in ['finishedsquarefeet12', 'garagetotalsqft', 'yearbuilt', 'calculatedfinishedsquarefeet', 'lotsizesquarefeet']:
         df = merge_median(df, ['loc_label'], col, 'loc_'+col+'_median')
+    '''
 
     return df
 
@@ -116,7 +121,7 @@ print(params)
 watchlist = [(d_train, 'train'), (d_valid, 'valid')]
 clf = xgb.train(params, d_train, 10000, watchlist, early_stopping_rounds=100, verbose_eval=10)
 
-fig, ax = plt.subplots(figsize=(15,30))
+fig, ax = plt.subplots(figsize=(20,40))
 xgb.plot_importance(clf, max_num_features=200, height=0.8, ax=ax)
 plt.savefig('../../data/importance.pdf')
 del d_train, d_valid
