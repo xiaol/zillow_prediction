@@ -32,9 +32,9 @@ def get_features(df):
     df = df.drop('transactiondate', axis=1)
     #df['tax_rt'] = df['taxamount'] / df['taxvaluedollarcnt']
     df['extra_bathroom_cnt'] = df['bathroomcnt'] - df['bedroomcnt']
-    df['room_sqt'] = df['calculatedfinishedsquarefeet']/df['roomcnt']
-    '''
+    #df['room_sqt'] = df['calculatedfinishedsquarefeet']/df['roomcnt']
     df['structure_tax_rt'] = df['structuretaxvaluedollarcnt'] / df['taxvaluedollarcnt']
+    '''
     df['land_tax_rt'] = df['landtaxvaluedollarcnt'] / df['taxvaluedollarcnt']
     '''
 
@@ -120,6 +120,7 @@ print(params)
 
 watchlist = [(d_train, 'train'), (d_valid, 'valid')]
 clf = xgb.train(params, d_train, 10000, watchlist, early_stopping_rounds=100, verbose_eval=10)
+xgb.cv()
 
 fig, ax = plt.subplots(figsize=(20,40))
 xgb.plot_importance(clf, max_num_features=200, height=0.8, ax=ax)
