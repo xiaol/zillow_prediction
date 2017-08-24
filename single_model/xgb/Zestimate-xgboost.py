@@ -30,10 +30,10 @@ def get_features(df):
     df['transaction_day'] = df['transactiondate'].dt.weekday.astype(np.int8)
 
     df = df.drop('transactiondate', axis=1)
-    df['tax_rt'] = df['taxamount'] / df['taxvaluedollarcnt']
+    #df['tax_rt'] = df['taxamount'] / df['taxvaluedollarcnt']
+    df['extra_bathroom_cnt'] = df['bathroomcnt'] - df['bedroomcnt']
 
     '''
-    df['extra_bathroom_cnt'] = df['bathroomcnt'] - df['bedroomcnt']
     df['room_sqt'] = df['calculatedfinishedsquarefeet']/df['roomcnt']
     df['structure_tax_rt'] = df['structuretaxvaluedollarcnt'] / df['taxvaluedollarcnt']
     df['land_tax_rt'] = df['landtaxvaluedollarcnt'] / df['taxvaluedollarcnt']
