@@ -32,7 +32,7 @@ def get_features(df):
     df = df.drop('transactiondate', axis=1)
     # df['tax_rt'] = df['taxamount'] / df['taxvaluedollarcnt']
     df['extra_bathroom_cnt'] = df['bathroomcnt'] - df['bedroomcnt']
-    # df['room_sqt'] = df['calculatedfinishedsquarefeet']/df['roomcnt']
+    df['room_sqt'] = df['calculatedfinishedsquarefeet']/df['roomcnt']
     # df['structure_tax_rt'] = df['structuretaxvaluedollarcnt'] / df['taxvaluedollarcnt']
     '''
     df['land_tax_rt'] = df['landtaxvaluedollarcnt'] / df['taxvaluedollarcnt']
@@ -42,7 +42,7 @@ def get_features(df):
     df = merge_nunique(df, ['loc_label'], 'parcelid', 'loc_building_num')
     df = merge_nunique(df, ['regionidzip'], 'parcelid', 'region_property_num')
     df = merge_nunique(df, ['regionidcity'], 'parcelid', 'city_property_num')
-    df = merge_nunique(df, ['regionidcounty'], 'parcelid', 'county_property_num')
+    # df = merge_nunique(df, ['regionidcounty'], 'parcelid', 'county_property_num')
 
     # df = merge_nunique(df, ['loc_label'], 'transaction_month', 'loc_month_transaction_count')
     # 商圈房屋状况均值
