@@ -40,8 +40,8 @@ def get_features(df):
 
     # 商圈内待售房屋数量
     df = merge_nunique(df, ['loc_label'], 'parcelid', 'loc_building_num')
-    '''
     df = merge_nunique(df, ['regionidzip'], 'parcelid', 'region_property_num')
+    '''
     df = merge_nunique(df, ['regionidcity'], 'parcelid', 'city_property_num')
     df = merge_nunique(df, ['regionidcounty'], 'parcelid', 'county_property_num')
     '''
