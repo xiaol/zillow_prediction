@@ -30,10 +30,10 @@ def get_features(df):
     df['transaction_day'] = df['transactiondate'].dt.weekday.astype(np.int8)
 
     df = df.drop('transactiondate', axis=1)
-    #df['tax_rt'] = df['taxamount'] / df['taxvaluedollarcnt']
+    # df['tax_rt'] = df['taxamount'] / df['taxvaluedollarcnt']
     df['extra_bathroom_cnt'] = df['bathroomcnt'] - df['bedroomcnt']
-    #df['room_sqt'] = df['calculatedfinishedsquarefeet']/df['roomcnt']
-    df['structure_tax_rt'] = df['structuretaxvaluedollarcnt'] / df['taxvaluedollarcnt']
+    # df['room_sqt'] = df['calculatedfinishedsquarefeet']/df['roomcnt']
+    # df['structure_tax_rt'] = df['structuretaxvaluedollarcnt'] / df['taxvaluedollarcnt']
     '''
     df['land_tax_rt'] = df['landtaxvaluedollarcnt'] / df['taxvaluedollarcnt']
     '''
@@ -119,8 +119,7 @@ params = {'eta': 0.015, 'objective': 'reg:linear', 'eval_metric': 'mae', 'min_ch
 print(params)
 
 watchlist = [(d_train, 'train'), (d_valid, 'valid')]
-clf = xgb.train(params, d_train, 10000, watchlist, early_stopping_rounds=100, verbose_eval=10)
-xgb.cv()
+clf = xgb.train(params, d_train, 10000, watchlist, verbose_eval=10) #  early_stopping_rounds=500,
 
 fig, ax = plt.subplots(figsize=(20,40))
 xgb.plot_importance(clf, max_num_features=200, height=0.8, ax=ax)
