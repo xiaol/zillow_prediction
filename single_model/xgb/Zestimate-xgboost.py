@@ -1,13 +1,12 @@
 #encoding=utf8
-import numpy as np
-import pandas as pd
-import xgboost as xgb
 import gc
-from datetime import datetime
-from sklearn.preprocessing import OneHotEncoder
-import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import sys
+from datetime import datetime
+
+import xgboost as xgb
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from util import *
 from sklearn.cluster import MiniBatchKMeans
 import matplotlib
@@ -65,11 +64,12 @@ print('Loading data ...')
 train = pd.read_csv('../../data/train_2016_v2.csv')
 prop = pd.read_csv('../../data/properties_2016.csv').fillna(-0.001)  # , nrows=500)
 sample = pd.read_csv('../../data/sample_submission.csv')
-
+'''
 print('Binding to float32')
 for c, dtype in zip(prop.columns, prop.dtypes):
     if dtype == np.float64:
         prop[c] = prop[c].astype(np.float32)
+'''
 
 print('Creating training set ...')
 train = train.sort_values('transactiondate')
@@ -192,4 +192,5 @@ sub.to_csv(file_path, index=False, float_format='%.4f')
 # 0.0644440 back to the start point, only change the validation set. [476]   train-mae:0.050504      valid-mae:0.052248
 
 # 0.0644258 add loc_label , loc_quality_median, loc_building_num  [485]   train-mae:0.051334      valid-mae:0.052187
+
 # Thanks to @inversion
