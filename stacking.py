@@ -117,6 +117,18 @@ def stacking_reg(clf,train_x,train_y,test_x,clf_name):
     return train.reshape(-1,1),test.reshape(-1,1)
 
 def rf_reg(x_train, y_train, x_valid):
+    x_train = np.log(x_train + 1)
+    x_valid = np.log(x_valid + 1)
+
+    where_are_nan = np.isnan(x_train)
+    where_are_inf = np.isinf(x_train)
+    x_train[where_are_nan] = 0
+    x_train[where_are_inf] = 0
+    where_are_nan = np.isnan(x_valid)
+    where_are_inf = np.isinf(x_valid)
+    x_valid[where_are_nan] = 0
+    x_valid[where_are_inf] = 0
+
     randomforest = RandomForestRegressor(n_estimators=600, max_depth=20, n_jobs=-1, random_state=2017, max_features="auto",verbose=1)
     rf_train, rf_test = stacking_reg(randomforest, x_train, y_train, x_valid,"rf")
     return rf_train, rf_test,"rf_reg"
@@ -127,11 +139,35 @@ def ada_reg(x_train, y_train, x_valid):
     return ada_train, ada_test,"ada_reg"
 
 def gb_reg(x_train, y_train, x_valid):
+    x_train = np.log(x_train + 1)
+    x_valid = np.log(x_valid + 1)
+
+    where_are_nan = np.isnan(x_train)
+    where_are_inf = np.isinf(x_train)
+    x_train[where_are_nan] = 0
+    x_train[where_are_inf] = 0
+    where_are_nan = np.isnan(x_valid)
+    where_are_inf = np.isinf(x_valid)
+    x_valid[where_are_nan] = 0
+    x_valid[where_are_inf] = 0
+
     gbdt = GradientBoostingRegressor(learning_rate=0.06, n_estimators=100, subsample=0.8, random_state=2017,max_depth=5,verbose=1)
     gbdt_train, gbdt_test = stacking_reg(gbdt, x_train, y_train, x_valid,"gb")
     return gbdt_train, gbdt_test,"gb_reg"
 
 def et_reg(x_train, y_train, x_valid):
+    x_train = np.log(x_train + 1)
+    x_valid = np.log(x_valid + 1)
+
+    where_are_nan = np.isnan(x_train)
+    where_are_inf = np.isinf(x_train)
+    x_train[where_are_nan] = 0
+    x_train[where_are_inf] = 0
+    where_are_nan = np.isnan(x_valid)
+    where_are_inf = np.isinf(x_valid)
+    x_valid[where_are_nan] = 0
+    x_valid[where_are_inf] = 0
+
     extratree = ExtraTreesRegressor(n_estimators=600, max_depth=22, max_features="auto", n_jobs=-1, random_state=2017,verbose=1)
     et_train, et_test = stacking_reg(extratree, x_train, y_train, x_valid,"et")
     return et_train, et_test,"et_reg"
@@ -234,8 +270,8 @@ def preprocess():
 
     print('Loading data ...')
 
-    train = pd.read_csv('data/train_2016_v2.csv', nrows=1000)
-    prop = pd.read_csv('data/properties_2016.csv', nrows=1000).fillna(-0.001)  # , nrows=500)
+    train = pd.read_csv('data/train_2016_v2.csv', nrows=5000)
+    prop = pd.read_csv('data/properties_2016.csv', nrows=5000).fillna(-0.001)  # , nrows=500)
     sample = pd.read_csv('data/sample_submission.csv')
     '''
     print('Binding to float32')
@@ -248,6 +284,7 @@ def preprocess():
     train = train.sort_values('transactiondate')
     train = train[train.transactiondate < '2017-01-01']
     split = train[train.transactiondate < '2016-10-01'].shape[0]
+    split = 4000
     print(split)
 
     train = train[train.logerror > -0.4]
@@ -287,13 +324,24 @@ def select_feature(clf,x_train,x_valid):
     print x_train.shape
 
     return x_train,x_valid
+
+def xg_eval_mae(yhat, dtrain):
+    y = dtrain.get_label()
+    # return 'mae', mean_absolute_error(np.exp(y), np.exp(yhat))
+    return 'mae', np.sum([abs(yhat[i]-y[i]) for i in range(len(yhat))])/ len(yhat)
+
+def MAE(yhat, y):
+    return np.sum([abs(yhat[i]-y[i]) for i in range(len(yhat))])/ len(yhat)
+
+
 if __name__=="__main__":
     np.random.seed(1)
     x_train, y_train, x_valid, y_valid= preprocess()
 
-    #选择重要特征
-    clf=GradientBoostingRegressor()
-    x_train,x_valid=select_feature(clf,x_train,x_valid)
+    # clf=GradientBoostingRegressor()
+    # x_train,x_valid=select_feature(clf,x_train,x_valid)
+    x_train = np.array(x_train)
+    x_valid = np.array(x_valid)
 
     folds = 5
     seed = 1
@@ -313,11 +361,22 @@ if __name__=="__main__":
     train = np.concatenate(train_data_list, axis=1)
     test = np.concatenate(test_data_list, axis=1)
 
-    train = pd.DataFrame(train)
-    train.columns = column_list
+    dtrain = xgboost.DMatrix(train, label=y_train)
+    dtest = xgboost.DMatrix(test)
 
-    test = pd.DataFrame(test)
-    test.columns = column_list
+    xgb_params = {'seed':0, 'colsample_bytree':0.8, 'silent':1, 'subsample':0.6, 'learning_rate': 0.01, 'objective': 'reg:linear', 'max_depth': 4, 'num_parallel_tree':1, 'min_child_weight':1, 'eval_metric':'mae'}
+    res = xgboost.cv(xgb_params, dtrain, num_boost_round=1000, nfold=4, seed=0, stratified=False, feval=xg_eval_mae,
+                     early_stopping_rounds=25, verbose_eval=10, show_stdv=True,  maximize=False)
 
-    train.to_csv("select_train_stacking.csv", index=None)
-    test.to_csv("select_test_stacking.csv", index=None)
+    best_nrounds = res.shape[0] -1
+    cv_mean = res.iloc[-1, 0]
+    cv_std = res.iloc[-1, 1]
+
+    print('Ensemble-CV: {0}+{1}'.format(cv_mean, cv_std))
+
+    gdbt = xgboost.train(xgb_params, dtrain, best_nrounds)
+
+    result = gdbt.predict(dtest)
+
+    f_test = MAE(y_valid, result)
+    print 'Test mae:', f_test
