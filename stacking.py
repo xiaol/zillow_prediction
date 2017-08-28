@@ -270,8 +270,8 @@ def preprocess():
 
     print('Loading data ...')
 
-    train = pd.read_csv('data/train_2016_v2.csv', nrows=5000)
-    prop = pd.read_csv('data/properties_2016.csv', nrows=5000).fillna(-0.001)  # , nrows=500)
+    train = pd.read_csv('data/train_2016_v2.csv')
+    prop = pd.read_csv('data/properties_2016.csv').fillna(-0.001)  # , nrows=500)
     sample = pd.read_csv('data/sample_submission.csv')
     '''
     print('Binding to float32')
