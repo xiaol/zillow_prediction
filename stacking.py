@@ -284,7 +284,6 @@ def preprocess():
     train = train.sort_values('transactiondate')
     train = train[train.transactiondate < '2017-01-01']
     split = train[train.transactiondate < '2016-10-01'].shape[0]
-    split = 4000
     print(split)
 
     train = train[train.logerror > -0.4]
