@@ -3,6 +3,9 @@
     <words>
       <w>haversine</w>
       <w>kmeans</w>
+      <w>preprocess</w>
+      <w>regressor</w>
+      <w>regressors</w>
     </words>
   </dictionary>
 </component>

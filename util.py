@@ -101,3 +101,19 @@ def get_stats(train_df, test_df, target_column, group_column='loc_label'):
     selected_test.drop([target_column, group_column, 'row_id', 'train'], axis=1, inplace=True)
 
     return np.array(selected_train), np.array(selected_test)
+
+
+def chunks(l, n):
+    """Yield successive n-sized chunks from l."""
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
+
+
+def xg_eval_mae(yhat, dtrain):
+    y = dtrain.get_label()
+    # return 'mae', mean_absolute_error(np.exp(y), np.exp(yhat))
+    return 'mae', np.sum([abs(yhat[i] - y[i]) for i in range(len(yhat))]) / len(yhat)
+
+
+def MAE(yhat, y):
+    return np.sum([abs(yhat[i] - y[i]) for i in range(len(yhat))]) / len(yhat)
