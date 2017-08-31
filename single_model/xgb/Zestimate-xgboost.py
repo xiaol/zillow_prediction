@@ -46,10 +46,8 @@ def get_features(df):
     # df = merge_count(df, ['transaction_month','regionidcity'], 'parcelid', 'city_month_transaction_count')
     # 商圈房屋状况均值
     # df = merge_median(df, ['regionidcity'], 'buildingqualitytypeid', 'city_quality_median')
-    '''
     for col in ['finishedsquarefeet12', 'garagetotalsqft', 'yearbuilt', 'calculatedfinishedsquarefeet', 'lotsizesquarefeet']:
         df = merge_median(df, ['loc_label'], col, 'loc_'+col+'_median')
-    '''
 
     return df
 
@@ -81,7 +79,7 @@ train = train[train.logerror > -0.4]
 train = train[train.logerror < 0.419]
 
 
-db = DBSCAN(eps=0.2, min_samples=50).fit(prop[['latitude', 'longitude']])
+db = DBSCAN(eps=0.2, min_samples=25).fit(prop[['latitude', 'longitude']])
 prop.loc[:, 'loc_label'] = db.labels_
 num_clusters = len(set(db.labels_)) - (1 if -1 in db.labels_ else 0)
 print('Number of clusters: {}'.format(num_clusters))
