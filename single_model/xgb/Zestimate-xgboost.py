@@ -46,7 +46,8 @@ def get_features(df):
     # df = merge_count(df, ['transaction_month','regionidcity'], 'parcelid', 'city_month_transaction_count')
     # 商圈房屋状况均值
     # df = merge_median(df, ['regionidcity'], 'buildingqualitytypeid', 'city_quality_median')
-    for col in ['finishedsquarefeet12', 'garagetotalsqft', 'yearbuilt', 'calculatedfinishedsquarefeet', 'lotsizesquarefeet']:
+    for col in ['finishedsquarefeet12', 'garagetotalsqft', 'yearbuilt', 'calculatedfinishedsquarefeet', 'lotsizesquarefeet',
+                'taxamount', 'basementsqft', 'room_sqt', 'poolcnt', ]:
         df = merge_mean(df, ['loc_label'], col, 'loc_'+col+'_median')
 
     return df
