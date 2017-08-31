@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="9e94916a-0923-47c1-9f7b-14fd9e4a69d7" name="Default" comment="" />
+    <list default="true" id="9e94916a-0923-47c1-9f7b-14fd9e4a69d7" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py" afterPath="$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -46,8 +48,8 @@
       <file leaf-file-name="Zestimate-xgboost.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1660">
-              <caret line="83" column="33" lean-forward="false" selection-start-line="83" selection-start-column="33" selection-end-line="83" selection-end-column="33" />
+            <state relative-caret-position="620">
+              <caret line="49" column="22" lean-forward="false" selection-start-line="49" selection-start-column="22" selection-end-line="49" selection-end-column="22" />
               <folding>
                 <element signature="e#15#24#0" expanded="true" />
               </folding>
@@ -599,12 +601,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py</url>
-          <line>176</line>
+          <line>174</line>
           <option name="timeStamp" value="17" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py</url>
-          <line>129</line>
+          <line>127</line>
           <option name="timeStamp" value="27" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -629,12 +631,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py</url>
-          <line>84</line>
+          <line>82</line>
           <option name="timeStamp" value="40" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py</url>
-          <line>53</line>
+          <line>51</line>
           <option name="timeStamp" value="43" />
         </line-breakpoint>
       </breakpoints>
@@ -1086,8 +1088,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1660">
-          <caret line="83" column="33" lean-forward="false" selection-start-line="83" selection-start-column="33" selection-end-line="83" selection-end-column="33" />
+        <state relative-caret-position="620">
+          <caret line="49" column="22" lean-forward="false" selection-start-line="49" selection-start-column="22" selection-end-line="49" selection-end-column="22" />
           <folding>
             <element signature="e#15#24#0" expanded="true" />
           </folding>
