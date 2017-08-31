@@ -4,7 +4,7 @@ import os
 import sys
 from datetime import datetime
 
-import xgboost as xgb
+import lightgbm as lgb
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from util import *
@@ -107,22 +107,24 @@ x_train, y_train, x_valid, y_valid = x_train[:split], y_train[:split], x_train[s
 
 print('Building DMatrix...')
 
-d_train = xgb.DMatrix(x_train, label=y_train)
-d_valid = xgb.DMatrix(x_valid, label=y_valid)
+d_train = lgb.Dataset(x_train, label=y_train)
+d_valid = lgb.Dataset(x_valid, label=y_valid)
 
 del x_train, x_valid; gc.collect()
 
 print('Training ...')
-
-params = {'eta': 0.015, 'objective': 'reg:linear', 'eval_metric': 'mae', 'min_child_weight': 1.5, 'colsample_bytree': 0.2, 'max_depth': 7, 'lambda': 0.3, 'alpha': 0.6, 'silent': 1}
+params = {'max_bin': 10, 'learning_rate': 0.0021, 'boosting_type': 'gbdt', 'objective': 'regression',
+                      'metric': 'l1', 'sub_feature': 0.345, 'bagging_fraction': 0.85, 'bagging_freq': 40,
+                      'num_leaves': 512, 'min_data': 500, 'min_hessian': 0.05, 'verbose': 0, 'feature_fraction_seed': 2,
+                      'bagging_seed': 3}
 
 print(params)
 
-watchlist = [(d_train, 'train'), (d_valid, 'valid')]
-clf = xgb.train(params, d_train, 10000, watchlist,  early_stopping_rounds=100, verbose_eval=10)
+watchlist = [d_valid]
+clf = lgb.train(params, d_train, 10000, watchlist,  early_stopping_rounds=100)
 
 fig, ax = plt.subplots(figsize=(20,40))
-xgb.plot_importance(clf, max_num_features=200, height=0.8, ax=ax)
+lgb.plot_importance(clf, max_num_features=200, height=0.8, ax=ax)
 plt.savefig('../../data/importance.pdf')
 del d_train, d_valid
 
@@ -161,8 +163,8 @@ for c in sub.columns[sub.columns != 'ParcelId']:
 
         x_test_fold = x_test_fold[train_columns.tolist()]
 
-        d_test_cks = xgb.DMatrix(x_test_fold)
-        p_test_cks = clf.predict(d_test_cks, ntree_limit=clf.best_ntree_limit)
+        d_test_cks = lgb.Dataset(x_test_fold)
+        p_test_cks = clf.predict(d_test_cks, num_iteration=clf.best_iteration)
 
         p_test = np.append(p_test, p_test_cks)
 
@@ -176,7 +178,7 @@ for c in sub.columns[sub.columns != 'ParcelId']:
 del prop, sample; gc.collect()
 
 print('Writing csv ...')
-file_path = '../../data/xgb' + datetime.now().strftime("%m_%d_%H_%M_%S")+'.csv'
+file_path = '../../data/lgb' + datetime.now().strftime("%m_%d_%H_%M_%S")+'.csv'
 sub.to_csv(file_path, index=False, float_format='%.4f')
 
 # #1 0.0645657  [270]	train-mae:0.052583	valid-mae:0.051849
