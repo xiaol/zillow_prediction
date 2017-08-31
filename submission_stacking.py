@@ -86,7 +86,7 @@ def stacking(test_x):
     return result
 
 
-def stacking_predict(test_x, clf_name, folds=5):
+def stacking_predict(test_x, clf_name, folds=folds):
     test_pre = np.empty((folds, test_x.shape[0], 1))
     test = np.zeros((test_x.shape[0], 1))
 

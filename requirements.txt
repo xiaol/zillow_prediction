@@ -1,0 +1,4 @@
+numpy
+pandas
+sklearn
+hdf5py   yum install hdf5-devel

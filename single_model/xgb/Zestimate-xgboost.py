@@ -161,7 +161,7 @@ for c in sub.columns[sub.columns != 'ParcelId']:
         x_test_fold = x_test_fold[train_columns.tolist()]
 
         d_test_cks = xgb.DMatrix(x_test_fold)
-        p_test_cks = clf.predict(d_test_cks, ntree_list=clf.best_ntree_limit)
+        p_test_cks = clf.predict(d_test_cks, ntree_limit=clf.best_ntree_limit)
 
         p_test = np.append(p_test, p_test_cks)
 

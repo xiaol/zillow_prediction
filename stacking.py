@@ -266,7 +266,6 @@ if __name__ == "__main__":
     x_train = np.array(x_train)
     x_valid = np.array(x_valid)
 
-    folds = 5
     seed = 1
     kf = KFold(x_train.shape[0], n_folds=folds, shuffle=True, random_state=seed)
 
@@ -298,6 +297,8 @@ if __name__ == "__main__":
     cv_std = res.iloc[-1, 1]
 
     print('Ensemble-CV: {0}+{1}'.format(cv_mean, cv_std))
+    with open("data/score.txt", "a") as f:
+        f.write('Ensemble-CV: {0}+{1}'.format(cv_mean, cv_std) + "\n")
 
     gdbt = xgb.train(xgb_params, dtrain, best_nrounds)
     gdbt.save_model('data/model/xgb_layer_2.model')
@@ -306,3 +307,5 @@ if __name__ == "__main__":
 
     f_test = MAE(y_valid, result)
     print 'Test mae:', f_test
+    with open("data/score.txt", "a") as f:
+        f.write('Test mae:' + str(f_test) + "\n")

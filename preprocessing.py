@@ -9,6 +9,7 @@ one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'bui
                        'regionidzip', 'hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid',
                        'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid', 'fips']
 
+folds =2
 
 def prepare_data(df, columns):
     df = pd.get_dummies(df, columns=columns, prefix=columns, sparse=True)
