@@ -83,6 +83,8 @@ train = train[train.logerror < 0.419]
 
 db = DBSCAN(eps=0.01, min_samples=1).fit(prop[['latitude', 'longitude']])
 prop.loc[:, 'loc_label'] = db.labels_
+num_clusters = len(set(db.labels_)) - (1 if -1 in db.labels_ else 0)
+print('Number of clusters: {}'.format(num_clusters))
 
 df_train = train.merge(prop, how='left', on='parcelid')
 
