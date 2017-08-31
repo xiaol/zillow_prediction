@@ -8,7 +8,7 @@ import xgboost as xgb
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from util import *
-from sklearn.cluster import MiniBatchKMeans
+from sklearn.cluster import DBSCAN
 import matplotlib
 matplotlib.use('pdf')
 import matplotlib.pyplot as plt
@@ -81,8 +81,8 @@ train = train[train.logerror > -0.4]
 train = train[train.logerror < 0.419]
 
 
-kmeans = MiniBatchKMeans(n_clusters=320, batch_size=1000).fit(prop[['latitude', 'longitude']])
-prop.loc[:, 'loc_label'] = kmeans.labels_
+db = DBSCAN(eps=0.01, min_samples=1).fit(prop[['latitude', 'longitude']])
+prop.loc[:, 'loc_label'] = db.labels_
 
 df_train = train.merge(prop, how='left', on='parcelid')
 
