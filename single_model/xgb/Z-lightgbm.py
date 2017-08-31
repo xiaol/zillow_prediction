@@ -74,6 +74,7 @@ print('Creating training set ...')
 train = train.sort_values('transactiondate')
 train = train[train.transactiondate < '2017-01-01']
 split = train[train.transactiondate < '2016-10-01'].shape[0]
+split = 4000
 print(split)
 
 train = train[train.logerror > -0.4]
@@ -123,9 +124,6 @@ print(params)
 watchlist = [d_valid]
 clf = lgb.train(params, d_train, 10000, watchlist,  early_stopping_rounds=100)
 
-fig, ax = plt.subplots(figsize=(20,40))
-lgb.plot_importance(clf, max_num_features=200, height=0.8, ax=ax)
-plt.savefig('../../data/importance.pdf')
 del d_train, d_valid
 
 print('Building test set ...')
@@ -163,12 +161,10 @@ for c in sub.columns[sub.columns != 'ParcelId']:
 
         x_test_fold = x_test_fold[train_columns.tolist()]
 
-        d_test_cks = lgb.Dataset(x_test_fold)
-        p_test_cks = clf.predict(d_test_cks, num_iteration=clf.best_iteration)
+        p_test_cks = clf.predict(x_test_fold, num_iteration=clf.best_iteration)
 
         p_test = np.append(p_test, p_test_cks)
 
-        del d_test_cks; gc.collect()
         del df_test_fold, x_test_fold; gc.collect()
 
     print(c)
