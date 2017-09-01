@@ -104,23 +104,33 @@ del df_train; gc.collect()
 
 
 # x_train, y_train, x_valid, y_valid = x_train[:split], y_train[:split], x_train[split:], y_train[split:]
+x_valid, y_valid = x_train[split:], y_train[split:]
 
 print('Building DMatrix...')
 
 d_train = xgb.DMatrix(x_train, label=y_train)
-# d_valid = xgb.DMatrix(x_valid, label=y_valid)
+d_valid = xgb.DMatrix(x_valid, label=y_valid)
 
 # del x_train, x_valid; gc.collect()
 del x_train; gc.collect()
 
 print('Training ...')
 
-params = {'eta': 0.015, 'objective': 'reg:linear', 'eval_metric': 'mae', 'min_child_weight': 1.5, 'colsample_bytree': 0.2, 'max_depth': 7, 'lambda': 0.3, 'alpha': 0.6, 'silent': 0}
+params = {'eta': 0.015, 'objective': 'reg:linear', 'eval_metric': 'mae', 'min_child_weight': 1.5, 'colsample_bytree': 0.2, 'max_depth': 7, 'lambda': 0.3, 'alpha': 0.6, 'silent': 1}
 
 print(params)
 
-# watchlist = [(d_train, 'train'), (d_valid, 'valid')]
-clf = xgb.train(params, d_train, 10000)  # watchlist,  early_stopping_rounds=100, verbose_eval=10)
+watchlist = [(d_train, 'train'), (d_valid, 'valid')]
+# cross-validation
+'''
+print("Running XGBoost CV....")
+res = xgb.cv(params, d_train, num_boost_round=2000, nfold=5, 
+                 early_stopping_rounds=100, verbose_eval=10, show_stdv=True)
+num_best_rounds = len(res)
+print("Number of best rounds: {}".format(num_best_rounds))
+'''
+num_best_rounds = 2000
+clf = xgb.train(params, d_train, num_best_rounds, watchlist, verbose_eval=10)  # watchlist,  early_stopping_rounds=100, verbose_eval=10)
 
 fig, ax = plt.subplots(figsize=(20,40))
 xgb.plot_importance(clf, max_num_features=200, height=0.8, ax=ax)
