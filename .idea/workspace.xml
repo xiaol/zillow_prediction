@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="9e94916a-0923-47c1-9f7b-14fd9e4a69d7" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py" afterPath="$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py" />
-    </list>
+    <list default="true" id="9e94916a-0923-47c1-9f7b-14fd9e4a69d7" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -25,8 +23,8 @@
       <file leaf-file-name="stacking.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/stacking.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1696">
-              <caret line="302" column="24" lean-forward="true" selection-start-line="302" selection-start-column="24" selection-end-line="302" selection-end-column="24" />
+            <state relative-caret-position="1490">
+              <caret line="291" column="14" lean-forward="false" selection-start-line="291" selection-start-column="14" selection-end-line="291" selection-end-column="14" />
               <folding>
                 <element signature="e#16#58#0" expanded="true" />
               </folding>
@@ -49,8 +47,8 @@
       <file leaf-file-name="Zestimate-xgboost.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1320">
-              <caret line="117" column="178" lean-forward="false" selection-start-line="117" selection-start-column="178" selection-end-line="117" selection-end-column="178" />
+            <state relative-caret-position="960">
+              <caret line="132" column="56" lean-forward="false" selection-start-line="132" selection-start-column="56" selection-end-line="132" selection-end-column="56" />
               <folding>
                 <element signature="e#15#24#0" expanded="true" />
               </folding>
@@ -93,8 +91,8 @@
       <file leaf-file-name="training.py" pinned="false" current-in-tab="false">
         <entry file="file:///usr/local/lib/python2.7/dist-packages/xgboost-0.6-py2.7.egg/xgboost/training.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="419">
-              <caret line="116" column="17" lean-forward="false" selection-start-line="116" selection-start-column="17" selection-end-line="116" selection-end-column="17" />
+            <state relative-caret-position="550">
+              <caret line="114" column="4" lean-forward="false" selection-start-line="114" selection-start-column="4" selection-end-line="114" selection-end-column="4" />
               <folding />
             </state>
           </provider>
@@ -640,12 +638,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py</url>
-          <line>177</line>
+          <line>187</line>
           <option name="timeStamp" value="17" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py</url>
-          <line>130</line>
+          <line>140</line>
           <option name="timeStamp" value="27" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -1111,8 +1109,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/stacking.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1696">
-          <caret line="302" column="24" lean-forward="true" selection-start-line="302" selection-start-column="24" selection-end-line="302" selection-end-column="24" />
+        <state relative-caret-position="1490">
+          <caret line="291" column="14" lean-forward="false" selection-start-line="291" selection-start-column="14" selection-end-line="291" selection-end-column="14" />
           <folding>
             <element signature="e#16#58#0" expanded="true" />
           </folding>
@@ -1121,16 +1119,16 @@
     </entry>
     <entry file="file:///usr/local/lib/python2.7/dist-packages/xgboost-0.6-py2.7.egg/xgboost/training.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="419">
-          <caret line="116" column="17" lean-forward="false" selection-start-line="116" selection-start-column="17" selection-end-line="116" selection-end-column="17" />
+        <state relative-caret-position="550">
+          <caret line="114" column="4" lean-forward="false" selection-start-line="114" selection-start-column="4" selection-end-line="114" selection-end-column="4" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1320">
-          <caret line="117" column="178" lean-forward="false" selection-start-line="117" selection-start-column="178" selection-end-line="117" selection-end-column="178" />
+        <state relative-caret-position="960">
+          <caret line="132" column="56" lean-forward="false" selection-start-line="132" selection-start-column="56" selection-end-line="132" selection-end-column="56" />
           <folding>
             <element signature="e#15#24#0" expanded="true" />
           </folding>

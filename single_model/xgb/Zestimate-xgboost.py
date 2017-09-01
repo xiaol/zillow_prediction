@@ -104,12 +104,12 @@ del df_train; gc.collect()
 
 
 # x_train, y_train, x_valid, y_valid = x_train[:split], y_train[:split], x_train[split:], y_train[split:]
-x_valid, y_valid = x_train[split:], y_train[split:]
+# x_valid, y_valid = x_train[split:], y_train[split:]
 
 print('Building DMatrix...')
 
 d_train = xgb.DMatrix(x_train, label=y_train)
-d_valid = xgb.DMatrix(x_valid, label=y_valid)
+# d_valid = xgb.DMatrix(x_valid, label=y_valid)
 
 # del x_train, x_valid; gc.collect()
 del x_train; gc.collect()
@@ -120,7 +120,7 @@ params = {'eta': 0.015, 'objective': 'reg:linear', 'eval_metric': 'mae', 'min_ch
 
 print(params)
 
-watchlist = [(d_train, 'train'), (d_valid, 'valid')]
+watchlist = [(d_train, 'train')]
 # cross-validation
 '''
 print("Running XGBoost CV....")
@@ -129,7 +129,7 @@ res = xgb.cv(params, d_train, num_boost_round=2000, nfold=5,
 num_best_rounds = len(res)
 print("Number of best rounds: {}".format(num_best_rounds))
 '''
-num_best_rounds = 2000
+num_best_rounds = 10000
 clf = xgb.train(params, d_train, num_best_rounds, watchlist, verbose_eval=10)  # watchlist,  early_stopping_rounds=100, verbose_eval=10)
 
 fig, ax = plt.subplots(figsize=(20,40))
@@ -174,7 +174,7 @@ for c in sub.columns[sub.columns != 'ParcelId']:
         x_test_fold = x_test_fold[train_columns.tolist()]
 
         d_test_cks = xgb.DMatrix(x_test_fold)
-        p_test_cks = clf.predict(d_test_cks, ntree_limit=clf.best_ntree_limit)
+        p_test_cks = clf.predict(d_test_cks) # , ntree_limit=clf.best_ntree_limit)
 
         p_test = np.append(p_test, p_test_cks)
 
