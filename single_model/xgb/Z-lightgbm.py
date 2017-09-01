@@ -114,14 +114,23 @@ del x_train, x_valid; gc.collect()
 
 print('Training ...')
 params = {'max_bin': 10, 'learning_rate': 0.0021, 'boosting_type': 'gbdt', 'objective': 'regression',
-                      'metric': 'l1', 'sub_feature': 0.345, 'bagging_fraction': 0.85, 'bagging_freq': 40,
-                      'num_leaves': 512, 'min_data': 500, 'min_hessian': 0.05, 'verbose': 0, 'feature_fraction_seed': 2,
-                      'bagging_seed': 3}
+                      'metric': 'l1', 'sub_feature': 0.5, 'bagging_fraction': 0.85, 'bagging_freq': 40,
+                      'num_leaves': 512, 'min_data': 500, 'min_hessian': 0.05, 'verbose': 0 }
 
 print(params)
 
 watchlist = [d_valid]
 clf = lgb.train(params, d_train, 10000, watchlist,  early_stopping_rounds=100)
+
+print("Features importance...")
+gain = clf.feature_importance('gain')
+ft = pd.DataFrame({'feature':clf.feature_name(), 'split':clf.feature_importance('split'), 'gain':100 * gain / gain.sum()}).sort_values('gain', ascending=False)
+print(ft.head(25))
+
+plt.figure()
+ft[['feature','gain']].head(25).plot(kind='barh', x='feature', y='gain', legend=False, figsize=(20, 40))
+plt.gcf().savefig('features_importance.png')
+
 
 del d_train, d_valid
 
