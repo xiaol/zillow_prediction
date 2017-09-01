@@ -103,14 +103,15 @@ pd.Series(list(x_train.columns)).to_csv('../../data/columns.csv')
 del df_train; gc.collect()
 
 
-x_train, y_train, x_valid, y_valid = x_train[:split], y_train[:split], x_train[split:], y_train[split:]
+# x_train, y_train, x_valid, y_valid = x_train[:split], y_train[:split], x_train[split:], y_train[split:]
 
 print('Building DMatrix...')
 
 d_train = xgb.DMatrix(x_train, label=y_train)
-d_valid = xgb.DMatrix(x_valid, label=y_valid)
+# d_valid = xgb.DMatrix(x_valid, label=y_valid)
 
-del x_train, x_valid; gc.collect()
+# del x_train, x_valid; gc.collect()
+del x_train; gc.collect()
 
 print('Training ...')
 
@@ -118,13 +119,14 @@ params = {'eta': 0.015, 'objective': 'reg:linear', 'eval_metric': 'mae', 'min_ch
 
 print(params)
 
-watchlist = [(d_train, 'train'), (d_valid, 'valid')]
-clf = xgb.train(params, d_train, 10000, watchlist,  early_stopping_rounds=100, verbose_eval=10)
+# watchlist = [(d_train, 'train'), (d_valid, 'valid')]
+clf = xgb.train(params, d_train, 10000)  # watchlist,  early_stopping_rounds=100, verbose_eval=10)
 
 fig, ax = plt.subplots(figsize=(20,40))
 xgb.plot_importance(clf, max_num_features=200, height=0.8, ax=ax)
 plt.savefig('../../data/importance.pdf')
-del d_train, d_valid
+# del d_train, d_valid
+del d_train
 
 print('Building test set ...')
 
