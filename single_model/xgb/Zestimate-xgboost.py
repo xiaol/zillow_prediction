@@ -125,12 +125,14 @@ watchlist = [(d_train, 'train')]
 # TODO bad news 0.0644361 higher than previous CV set, interesting. 858
 # remove cv. back to last point. and continue to test features.
 # fold 2 , 0.0643877, overfitting is working. 620+-
-print("Running XGBoost CV....")
-res = xgb.cv(params, d_train, num_boost_round=2000, nfold=1,
+'''
+rint("Running XGBoost CV....")
+res = xgb.cv(params, d_train, num_boost_round=2000, nfold=2,
                  early_stopping_rounds=100, verbose_eval=10, show_stdv=True)
 num_best_rounds = len(res)
 print("Number of best rounds: {}".format(num_best_rounds))
-# num_best_rounds = 858
+'''
+num_best_rounds = 520
 clf = xgb.train(params, d_train, num_best_rounds, watchlist, verbose_eval=10)  # watchlist,  early_stopping_rounds=100, verbose_eval=10)
 
 fig, ax = plt.subplots(figsize=(20,40))
