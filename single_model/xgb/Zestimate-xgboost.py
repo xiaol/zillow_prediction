@@ -76,15 +76,25 @@ train = train[train.transactiondate < '2017-01-01']
 split = train[train.transactiondate < '2016-10-01'].shape[0]
 print(split)
 
-train = train[train.logerror > -0.4]
-train = train[train.logerror < 0.419]
-
-
 db = DBSCAN(eps=0.2, min_samples=25).fit(prop[['latitude', 'longitude']])
 prop.loc[:, 'loc_label'] = db.labels_
 num_clusters = len(set(db.labels_)) - (1 if -1 in db.labels_ else 0)
 print('Number of clusters: {}'.format(num_clusters))
 
+# outliers -----------------------------------------------
+outliers_over = train[train.logerror >= 0.419]
+outliers_under = train[train.logerror <= -0.4]
+
+df_ol_train_1 = outliers_over.merge(prop, how='left', on='parcelid')
+df_ol_train_2 = outliers_under.merge(prop, how='left', on='parcelid')
+
+
+# outliers -----------------------------------------------
+
+
+# typical ------------------------------------------------
+train = train[train.logerror > -0.4]
+train = train[train.logerror < 0.419]
 df_train = train.merge(prop, how='left', on='parcelid')
 
 x_train = df_train
@@ -98,7 +108,6 @@ y_train = df_train['logerror'].values
 print(x_train.shape, y_train.shape)
 print x_train.columns
 pd.Series(list(x_train.columns)).to_csv('../../data/columns.csv')
-
 
 del df_train; gc.collect()
 
@@ -132,7 +141,7 @@ res = xgb.cv(params, d_train, num_boost_round=2000, nfold=2,
 num_best_rounds = len(res)
 print("Number of best rounds: {}".format(num_best_rounds))
 '''
-num_best_rounds = 520
+num_best_rounds = 400
 clf = xgb.train(params, d_train, num_best_rounds, watchlist, verbose_eval=10)  # watchlist,  early_stopping_rounds=100, verbose_eval=10)
 
 fig, ax = plt.subplots(figsize=(20,40))
@@ -140,14 +149,14 @@ xgb.plot_importance(clf, max_num_features=200, height=0.8, ax=ax)
 plt.savefig('../../data/importance.pdf')
 # del d_train, d_valid
 del d_train
+# typical ------------------------------------------------------------------------
 
 print('Building test set ...')
-
-print('Predicting on test ...')
 sub = pd.read_csv('../../data/sample_submission.csv')
 sample['parcelid'] = sample['ParcelId']
 print(sample.shape)
 
+print('Predicting on test ...')
 for c in sub.columns[sub.columns != 'ParcelId']:
     if c > '201709':
         sub[c] = p_test
