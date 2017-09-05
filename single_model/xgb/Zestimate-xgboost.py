@@ -88,7 +88,6 @@ x_train = df_train
 x_train = get_features(x_train)
 x_train = prepare_data(x_train, one_hot_encode_cols)
 
-train_columns = x_train.columns
 
 # outliers -----------------------------------------------
 outliers = x_train[x_train.logerror >= 0.419]
@@ -132,9 +131,10 @@ tx_train = x_train[x_train.logerror < 0.419]
 ty_train = tx_train['logerror'].values
 tx_train = tx_train.drop(drop_cols, axis=1)
 
+train_columns = tx_train.columns
 print(tx_train.shape, ty_train.shape)
-print x_train.columns
-pd.Series(list(x_train.columns)).to_csv('../../data/columns.csv')
+print tx_train.columns
+pd.Series(list(tx_train.columns)).to_csv('../../data/columns.csv')
 
 del df_train; gc.collect()
 
