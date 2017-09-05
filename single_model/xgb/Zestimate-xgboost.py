@@ -93,7 +93,7 @@ train_columns = x_train.columns
 # outliers -----------------------------------------------
 outliers = x_train[x_train.logerror >= 0.419]
 outliers_under = x_train[x_train.logerror <= -0.4]
-typical = x_train[(x_train.logerror > -0.005) & (x_train.logerror < 0.005)]
+typical = x_train[(x_train.logerror > -0.4) & (x_train.logerror < 0.419)]
 
 df_ol_train_1 = outliers.assign(classical=pd.Series(np.ones(outliers.shape[0]), index=outliers.index))
 df_ty_train_3 = typical.assign(classical=pd.Series(np.zeros(typical.shape[0]), index=typical.index))
@@ -112,7 +112,7 @@ d_ol_train = xgb.DMatrix(ol_train, label=y_ol_train)
 
 print('Training classifier ...')
 
-ol_params = {'objective': 'binary:logistic', 'silent': 1}
+ol_params = {'objective': 'reg:logistic', 'silent': 1}
 print(ol_params)
 
 ol_clf = xgb.train(ol_params, d_ol_train, 300, [(d_ol_train, 'train')])
@@ -216,6 +216,9 @@ for c in sub.columns[sub.columns != 'ParcelId']:
 
         d_test_cks = xgb.DMatrix(x_test_fold)
         p_test_cks = clf.predict(d_test_cks) # , ntree_limit=clf.best_ntree_limit)
+
+        p_ol_test_cks = ol_clf.predict(d_test_cks)/100.0
+        p_test_cks = p_test_cks + p_ol_test_cks
 
         p_test = np.append(p_test, p_test_cks)
 
