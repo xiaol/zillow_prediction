@@ -81,31 +81,58 @@ prop.loc[:, 'loc_label'] = db.labels_
 num_clusters = len(set(db.labels_)) - (1 if -1 in db.labels_ else 0)
 print('Number of clusters: {}'.format(num_clusters))
 
-# outliers -----------------------------------------------
-outliers_over = train[train.logerror >= 0.419]
-outliers_under = train[train.logerror <= -0.4]
-
-df_ol_train_1 = outliers_over.merge(prop, how='left', on='parcelid')
-df_ol_train_2 = outliers_under.merge(prop, how='left', on='parcelid')
-
-
-# outliers -----------------------------------------------
-
-
-# typical ------------------------------------------------
-train = train[train.logerror > -0.4]
-train = train[train.logerror < 0.419]
+# ---------------------------------------------------------
 df_train = train.merge(prop, how='left', on='parcelid')
 
 x_train = df_train
 x_train = get_features(x_train)
 x_train = prepare_data(x_train, one_hot_encode_cols)
-x_train = x_train.drop(drop_cols, axis=1)
 
 train_columns = x_train.columns
 
-y_train = df_train['logerror'].values
-print(x_train.shape, y_train.shape)
+# outliers -----------------------------------------------
+outliers = x_train[x_train.logerror >= 0.419]
+outliers_under = x_train[x_train.logerror <= -0.4]
+typical = x_train[(x_train.logerror > -0.005) & (x_train.logerror < 0.005)]
+
+df_ol_train_1 = outliers.assign(classical=pd.Series(np.ones(outliers.shape[0]), index=outliers.index))
+df_ty_train_3 = typical.assign(classical=pd.Series(np.zeros(typical.shape[0]), index=typical.index))
+
+df_ol_train = pd.concat([df_ol_train_1, df_ty_train_3])
+
+ol_train = df_ol_train
+ol_train = ol_train.drop(drop_cols, axis=1)
+ol_train = ol_train.drop(['classical'], axis=1)
+
+y_ol_train = df_ol_train['classical'].values
+print(ol_train.shape, y_ol_train.shape)
+print ol_train.columns
+
+d_ol_train = xgb.DMatrix(ol_train, label=y_ol_train)
+
+print('Training classifier ...')
+
+ol_params = {'objective': 'binary:logistic', 'silent': 1}
+print(ol_params)
+
+ol_clf = xgb.train(ol_params, d_ol_train, 300, [(d_ol_train, 'train')])
+fig, ax = plt.subplots(figsize=(20,40))
+xgb.plot_importance(ol_clf, max_num_features=200, height=0.8, ax=ax)
+plt.savefig('../../data/ol_importance.pdf')
+
+del df_ol_train, ol_train;gc.collect()
+
+# outliers -----------------------------------------------
+
+
+# typical ------------------------------------------------
+tx_train = x_train[x_train.logerror > -0.4]
+tx_train = x_train[x_train.logerror < 0.419]
+
+ty_train = tx_train['logerror'].values
+tx_train = tx_train.drop(drop_cols, axis=1)
+
+print(tx_train.shape, ty_train.shape)
 print x_train.columns
 pd.Series(list(x_train.columns)).to_csv('../../data/columns.csv')
 
@@ -117,11 +144,11 @@ del df_train; gc.collect()
 
 print('Building DMatrix...')
 
-d_train = xgb.DMatrix(x_train, label=y_train)
+d_train = xgb.DMatrix(tx_train, label=ty_train)
 # d_valid = xgb.DMatrix(x_valid, label=y_valid)
 
 # del x_train, x_valid; gc.collect()
-del x_train; gc.collect()
+del tx_train; gc.collect()
 
 print('Training ...')
 
@@ -133,15 +160,17 @@ watchlist = [(d_train, 'train')]
 # cross-validation
 # TODO bad news 0.0644361 higher than previous CV set, interesting. 858
 # remove cv. back to last point. and continue to test features.
-# fold 2 , 0.0643877, overfitting is working. 620+-
+# fold 2 , 0.0643877, overfitting is working. 620+-,
+# 520 0.0643864  400 0.0644272
+# TODO test 570
 '''
 rint("Running XGBoost CV....")
 res = xgb.cv(params, d_train, num_boost_round=2000, nfold=2,
                  early_stopping_rounds=100, verbose_eval=10, show_stdv=True)
 num_best_rounds = len(res)
-print("Number of best rounds: {}".format(num_best_rounds))
 '''
-num_best_rounds = 400
+num_best_rounds = 520
+print("Number of rounds: {}".format(num_best_rounds))
 clf = xgb.train(params, d_train, num_best_rounds, watchlist, verbose_eval=10)  # watchlist,  early_stopping_rounds=100, verbose_eval=10)
 
 fig, ax = plt.subplots(figsize=(20,40))
