@@ -18,7 +18,7 @@ one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'bui
 
 
 def prepare_data(df, columns):
-    df = pd.get_dummies(df, columns=columns, prefix=columns, sparse=True).fillna(0)
+    df = pd.get_dummies(df, columns=columns, prefix=columns, sparse=True)
     return df
 
 
@@ -87,7 +87,7 @@ df_train = train.merge(prop, how='left', on='parcelid')
 x_train = df_train
 x_train = get_features(x_train)
 x_train = prepare_data(x_train, one_hot_encode_cols)
-
+x_train = x_train.fillna(0)
 
 # outliers -----------------------------------------------
 outliers = x_train[x_train.logerror >= 0.419]
@@ -97,6 +97,7 @@ typical = x_train[(x_train.logerror > -0.4) & (x_train.logerror < 0.419)]
 
 df_ol_train_1 = outliers.assign(classical=pd.Series(np.ones(outliers.shape[0]), index=outliers.index))
 print(df_ol_train_1.head(2))
+print(df_ol_train_1.isnull())
 zero_columns = list(df_ol_train_1.columns[(df_ol_train_1 == 0).all()])
 print(zero_columns)
 df_ty_train_3 = typical.assign(classical=pd.Series(np.zeros(typical.shape[0]), index=typical.index))
