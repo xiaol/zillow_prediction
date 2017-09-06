@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="9e94916a-0923-47c1-9f7b-14fd9e4a69d7" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py" afterPath="$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -59,8 +59,8 @@
       <file leaf-file-name="Zestimate-xgboost.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1300">
-              <caret line="146" column="47" lean-forward="true" selection-start-line="146" selection-start-column="47" selection-end-line="146" selection-end-column="47" />
+            <state relative-caret-position="760">
+              <caret line="101" column="0" lean-forward="true" selection-start-line="101" selection-start-column="0" selection-end-line="101" selection-end-column="0" />
               <folding>
                 <element signature="e#15#24#0" expanded="true" />
               </folding>
@@ -1112,8 +1112,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1300">
-          <caret line="146" column="47" lean-forward="true" selection-start-line="146" selection-start-column="47" selection-end-line="146" selection-end-column="47" />
+        <state relative-caret-position="760">
+          <caret line="101" column="0" lean-forward="true" selection-start-line="101" selection-start-column="0" selection-end-line="101" selection-end-column="0" />
           <folding>
             <element signature="e#15#24#0" expanded="true" />
           </folding>

@@ -112,10 +112,10 @@ d_ol_train = xgb.DMatrix(ol_train, label=y_ol_train)
 
 print('Training classifier ...')
 
-ol_params = {'objective': 'reg:logistic', 'silent': 1, 'max_delta_step':5}
+ol_params = {'objective': 'reg:logistic', 'silent': 1, 'max_delta_step': 10}
 print(ol_params)
 
-ol_clf = xgb.train(ol_params, d_ol_train, 300, [(d_ol_train, 'train')])
+ol_clf = xgb.train(ol_params, d_ol_train, 300, [(d_ol_train, 'train')], verbose_eval=10)
 fig, ax = plt.subplots(figsize=(20,40))
 xgb.plot_importance(ol_clf, max_num_features=200, height=0.8, ax=ax)
 plt.savefig('../../data/ol_importance.pdf')
