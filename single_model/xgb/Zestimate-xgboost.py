@@ -18,7 +18,7 @@ one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'bui
 
 
 def prepare_data(df, columns):
-    df = pd.get_dummies(df, columns=columns, prefix=columns, sparse=True)
+    df = pd.get_dummies(df, columns=columns, prefix=columns, sparse=True).fillna(0)
     return df
 
 
@@ -31,7 +31,7 @@ def get_features(df):
     df = df.drop('transactiondate', axis=1)
     # df['tax_rt'] = df['taxamount'] / df['taxvaluedollarcnt']
     df['extra_bathroom_cnt'] = df['bathroomcnt'] - df['bedroomcnt']
-    df['room_sqt'] = df['calculatedfinishedsquarefeet']/df['roomcnt']
+    df['room_sqt'] = df['calculatedfinishedsquarefeet']/(df['roomcnt'] + 1)
     # df['structure_tax_rt'] = df['structuretaxvaluedollarcnt'] / df['taxvaluedollarcnt']
     '''
     df['land_tax_rt'] = df['landtaxvaluedollarcnt'] / df['taxvaluedollarcnt']
