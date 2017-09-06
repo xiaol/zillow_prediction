@@ -100,7 +100,6 @@ print(df_ol_train_1.head(2))
 print((df_ol_train_1 == np.nan).head(2))
 zero_columns = list(df_ol_train_1.columns[(df_ol_train_1 == 0).all()])
 print(zero_columns)
-raw_input('========Hold on=======')
 df_ty_train_3 = typical.assign(classical=pd.Series(np.zeros(typical.shape[0]), index=typical.index))
 
 df_ol_train = pd.concat([df_ol_train_1, df_ty_train_3])
@@ -121,7 +120,7 @@ print('Training classifier ...')
 ol_params = {'objective': 'reg:logistic', 'silent': 1, 'max_delta_step': 10}
 print(ol_params)
 
-ol_clf = xgb.train(ol_params, d_ol_train, 300, [(d_ol_train, 'train')], verbose_eval=10)
+ol_clf = xgb.train(ol_params, d_ol_train, 500, [(d_ol_train, 'train')], verbose_eval=10)
 fig, ax = plt.subplots(figsize=(20,40))
 xgb.plot_importance(ol_clf, max_num_features=200, height=0.8, ax=ax)
 plt.savefig('../../data/ol_importance.pdf')
@@ -223,13 +222,15 @@ for c in sub.columns[sub.columns != 'ParcelId']:
         d_test_cks = xgb.DMatrix(x_test_fold)
         p_test_cks = clf.predict(d_test_cks) # , ntree_limit=clf.best_ntree_limit)
 
-        p_ol_test_cks = ol_clf.predict(d_test_cks)/100.0
+        ol_test_fold = x_test_fold.drop(zero_columns)
+        d_ol_test_cks = xgb.DMatrix(ol_test_fold)
+        p_ol_test_cks = ol_clf.predict(d_ol_test_cks)/100.0
         p_test_cks = p_test_cks + p_ol_test_cks
 
         p_test = np.append(p_test, p_test_cks)
 
-        del d_test_cks; gc.collect()
-        del df_test_fold, x_test_fold; gc.collect()
+        del d_test_cks, d_ol_test_cks; gc.collect()
+        del df_test_fold, x_test_fold, ol_test_fold; gc.collect()
 
     print(c)
 
