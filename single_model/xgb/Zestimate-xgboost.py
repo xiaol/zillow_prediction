@@ -86,7 +86,7 @@ df_train = train.merge(prop, how='left', on='parcelid')
 
 df_train = get_features(df_train)
 df_train = prepare_data(df_train, one_hot_encode_cols)
-# df_train[df_train == df_train['fips_6059.0'][0]] = 0
+df_train[df_train == np.nan] = 0
 x_train = df_train
 
 
