@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="9e94916a-0923-47c1-9f7b-14fd9e4a69d7" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py" afterPath="$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py" />
-    </list>
+    <list default="true" id="9e94916a-0923-47c1-9f7b-14fd9e4a69d7" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -59,8 +57,8 @@
       <file leaf-file-name="Zestimate-xgboost.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="320">
-              <caret line="64" column="13" lean-forward="false" selection-start-line="64" selection-start-column="13" selection-end-line="64" selection-end-column="13" />
+            <state relative-caret-position="840">
+              <caret line="87" column="25" lean-forward="false" selection-start-line="87" selection-start-column="25" selection-end-line="87" selection-end-column="25" />
               <folding>
                 <element signature="e#15#24#0" expanded="true" />
               </folding>
@@ -578,14 +576,13 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="28" y="516" width="1266" height="1899" extended-state="0" />
-    <editor active="true" />
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32974505" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.20056657" sideWeight="0.5065574" order="6" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3297207" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.20056657" sideWeight="0.49344262" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.21643059" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18696883" sideWeight="0.4967213" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18696883" sideWeight="0.4967213" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.13934426" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32917848" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -641,12 +638,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py</url>
-          <line>235</line>
+          <line>236</line>
           <option name="timeStamp" value="17" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py</url>
-          <line>186</line>
+          <line>187</line>
           <option name="timeStamp" value="27" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -671,17 +668,17 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py</url>
-          <line>131</line>
+          <line>132</line>
           <option name="timeStamp" value="68" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py</url>
-          <line>126</line>
+          <line>127</line>
           <option name="timeStamp" value="72" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py</url>
-          <line>99</line>
+          <line>100</line>
           <option name="timeStamp" value="73" />
         </line-breakpoint>
       </breakpoints>
@@ -1116,8 +1113,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="320">
-          <caret line="64" column="13" lean-forward="false" selection-start-line="64" selection-start-column="13" selection-end-line="64" selection-end-column="13" />
+        <state relative-caret-position="840">
+          <caret line="87" column="25" lean-forward="false" selection-start-line="87" selection-start-column="25" selection-end-line="87" selection-end-column="25" />
           <folding>
             <element signature="e#15#24#0" expanded="true" />
           </folding>
