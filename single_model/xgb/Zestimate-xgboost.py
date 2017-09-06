@@ -82,14 +82,11 @@ num_clusters = len(set(db.labels_)) - (1 if -1 in db.labels_ else 0)
 print('Number of clusters: {}'.format(num_clusters))
 
 # ---------------------------------------------------------
-t_prop = prepare_data(prop.head(1000), one_hot_encode_cols).fillna(0)
-print(t_prop.head(2))
-raw_input('========Hold on=======')
 df_train = train.merge(prop, how='left', on='parcelid')
 
 df_train = get_features(df_train)
 df_train = prepare_data(df_train, one_hot_encode_cols)
-df_train[df_train == np.nan] = 0
+raw_input('========Hold on=======')
 x_train = df_train
 
 
@@ -102,7 +99,7 @@ typical = x_train[(x_train.logerror > -0.4) & (x_train.logerror < 0.419)]
 df_ol_train_1 = outliers.assign(classical=pd.Series(np.ones(outliers.shape[0]), index=outliers.index))
 print(df_ol_train_1.head(2))
 print((df_ol_train_1 == np.nan).head(2))
-zero_columns = list(df_ol_train_1.columns[(df_ol_train_1 == np.nan).all()])
+zero_columns = list(df_ol_train_1.columns[(df_ol_train_1 == 0).all()])
 print(zero_columns)
 df_ty_train_3 = typical.assign(classical=pd.Series(np.zeros(typical.shape[0]), index=typical.index))
 
