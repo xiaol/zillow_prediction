@@ -99,7 +99,7 @@ typical = x_train[(x_train.logerror > -0.4) & (x_train.logerror < 0.419)]
 df_ol_train_1 = outliers.assign(classical=pd.Series(np.ones(outliers.shape[0]), index=outliers.index))
 print(df_ol_train_1.head(2))
 print((df_ol_train_1 == np.nan).head(2))
-zero_columns = list(df_ol_train_1.columns[(df_ol_train_1 == df_ol_train_1['fips_6059.0'][0]).all()])
+zero_columns = list(df_ol_train_1.columns[(df_ol_train_1 == np.nan).all()])
 print(zero_columns)
 df_ty_train_3 = typical.assign(classical=pd.Series(np.zeros(typical.shape[0]), index=typical.index))
 
