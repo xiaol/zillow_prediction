@@ -86,7 +86,6 @@ df_train = train.merge(prop, how='left', on='parcelid')
 
 df_train = get_features(df_train)
 df_train = prepare_data(df_train, one_hot_encode_cols)
-raw_input('========Hold on=======')
 x_train = df_train
 
 
@@ -101,6 +100,7 @@ print(df_ol_train_1.head(2))
 print((df_ol_train_1 == np.nan).head(2))
 zero_columns = list(df_ol_train_1.columns[(df_ol_train_1 == 0).all()])
 print(zero_columns)
+raw_input('========Hold on=======')
 df_ty_train_3 = typical.assign(classical=pd.Series(np.zeros(typical.shape[0]), index=typical.index))
 
 df_ol_train = pd.concat([df_ol_train_1, df_ty_train_3])
