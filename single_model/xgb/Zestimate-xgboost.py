@@ -96,6 +96,8 @@ outliers_under = x_train[x_train.logerror <= -0.4]
 typical = x_train[(x_train.logerror > -0.4) & (x_train.logerror < 0.419)]
 
 df_ol_train_1 = outliers.assign(classical=pd.Series(np.ones(outliers.shape[0]), index=outliers.index))
+zero_columns = list(df_ol_train_1.columns[(df_ol_train_1 == 0).all()])
+print(zero_columns)
 df_ty_train_3 = typical.assign(classical=pd.Series(np.zeros(typical.shape[0]), index=typical.index))
 
 df_ol_train = pd.concat([df_ol_train_1, df_ty_train_3])
@@ -103,6 +105,7 @@ df_ol_train = pd.concat([df_ol_train_1, df_ty_train_3])
 ol_train = df_ol_train
 ol_train = ol_train.drop(drop_cols, axis=1)
 ol_train = ol_train.drop(['classical'], axis=1)
+ol_train = ol_train.drop(zero_columns, axis=1)
 
 y_ol_train = df_ol_train['classical'].values
 print(ol_train.shape, y_ol_train.shape)
