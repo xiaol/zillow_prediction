@@ -220,7 +220,7 @@ for c in sub.columns[sub.columns != 'ParcelId']:
         d_test_cks = xgb.DMatrix(x_test_fold)
         p_test_cks = clf.predict(d_test_cks) # , ntree_limit=clf.best_ntree_limit)
 
-        ol_test_fold = x_test_fold.drop(zero_columns)
+        ol_test_fold = x_test_fold.drop(zero_columns, axis=1)
         d_ol_test_cks = xgb.DMatrix(ol_test_fold)
         p_ol_test_cks = ol_clf.predict(d_ol_test_cks)/100.0
         p_test_cks = p_test_cks + p_ol_test_cks
