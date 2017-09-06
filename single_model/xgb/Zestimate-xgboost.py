@@ -82,6 +82,9 @@ num_clusters = len(set(db.labels_)) - (1 if -1 in db.labels_ else 0)
 print('Number of clusters: {}'.format(num_clusters))
 
 # ---------------------------------------------------------
+t_prop = prepare_data(prop, one_hot_encode_cols).fillna(0)
+print(t_prop.head(2))
+raw_input('========Hold on=======')
 df_train = train.merge(prop, how='left', on='parcelid')
 
 df_train = get_features(df_train)
