@@ -87,7 +87,7 @@ df_train = train.merge(prop, how='left', on='parcelid')
 x_train = df_train
 x_train = get_features(x_train)
 x_train = prepare_data(x_train, one_hot_encode_cols)
-x_train[(x_train == np.nan) == 0] = 0
+x_train[x_train == x_train['fips_6059.0'][0]] = 0
 
 
 # outliers -----------------------------------------------
