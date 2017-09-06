@@ -91,8 +91,9 @@ x_train = prepare_data(x_train, one_hot_encode_cols)
 
 # outliers -----------------------------------------------
 outliers = x_train[x_train.logerror >= 0.419]
+print('Outliers:',outliers.shape)
 outliers_under = x_train[x_train.logerror <= -0.4]
-typical = x_train[(x_train.logerror > -0.4) & (x_train.logerror < 0.419)]
+typical = x_train[(x_train.logerror > -0.005) & (x_train.logerror < 0.005)]
 
 df_ol_train_1 = outliers.assign(classical=pd.Series(np.ones(outliers.shape[0]), index=outliers.index))
 df_ty_train_3 = typical.assign(classical=pd.Series(np.zeros(typical.shape[0]), index=typical.index))
@@ -121,8 +122,7 @@ plt.savefig('../../data/ol_importance.pdf')
 
 del df_ol_train, ol_train;gc.collect()
 
-# outliers -----------------------------------------------
-
+raw_input("Press Enter to continue ...")
 
 # typical ------------------------------------------------
 tx_train = x_train[x_train.logerror > -0.4]
