@@ -97,7 +97,7 @@ typical = x_train[(x_train.logerror > -0.4) & (x_train.logerror < 0.419)]
 
 df_ol_train_1 = outliers.assign(classical=pd.Series(np.ones(outliers.shape[0]), index=outliers.index))
 zero_columns = list(df_ol_train_1.columns[(df_ol_train_1 == 0).all()])
-print(zero_columns)
+# print(zero_columns)
 df_ty_train_3 = typical.assign(classical=pd.Series(np.zeros(typical.shape[0]), index=typical.index))
 
 df_ol_train = pd.concat([df_ol_train_1, df_ty_train_3])
@@ -115,7 +115,8 @@ d_ol_train = xgb.DMatrix(ol_train, label=y_ol_train)
 
 print('Training classifier ...')
 
-ol_params = {'objective': 'reg:logistic', 'silent': 1, 'max_delta_step': 10}
+# TODO if closer ,use binary logistic prob ,may undersample the typical.
+ol_params = {'objective': 'binary:logistic', 'silent': 1, 'max_delta_step': 10}
 print(ol_params)
 
 ol_clf = xgb.train(ol_params, d_ol_train, 500, [(d_ol_train, 'train')], verbose_eval=10)
