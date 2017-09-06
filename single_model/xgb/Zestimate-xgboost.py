@@ -61,7 +61,7 @@ def chunks(l, n):
 print('Loading data ...')
 
 train = pd.read_csv('../../data/train_2016_v2.csv')
-prop = pd.read_csv('../../data/properties_2016.csv').fillna(0)  # , nrows=500)
+prop = pd.read_csv('../../data/properties_2016.csv').fillna(0.0)  # , nrows=500)
 sample = pd.read_csv('../../data/sample_submission.csv')
 '''
 print('Binding to float32')
@@ -96,8 +96,6 @@ outliers_under = x_train[x_train.logerror <= -0.4]
 typical = x_train[(x_train.logerror > -0.4) & (x_train.logerror < 0.419)]
 
 df_ol_train_1 = outliers.assign(classical=pd.Series(np.ones(outliers.shape[0]), index=outliers.index))
-print(df_ol_train_1.head(2))
-print((df_ol_train_1 == np.nan).head(2))
 zero_columns = list(df_ol_train_1.columns[(df_ol_train_1 == 0).all()])
 print(zero_columns)
 df_ty_train_3 = typical.assign(classical=pd.Series(np.zeros(typical.shape[0]), index=typical.index))
@@ -127,7 +125,7 @@ plt.savefig('../../data/ol_importance.pdf')
 
 del df_ol_train, ol_train;gc.collect()
 
-raw_input("Press Enter to continue ...")
+# raw_input("Press Enter to continue ...")
 
 # typical ------------------------------------------------
 tx_train = x_train[x_train.logerror > -0.4]
