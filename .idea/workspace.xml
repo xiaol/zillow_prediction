@@ -59,8 +59,8 @@
       <file leaf-file-name="Zestimate-xgboost.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="746">
-              <caret line="164" column="23" lean-forward="false" selection-start-line="164" selection-start-column="23" selection-end-line="164" selection-end-column="23" />
+            <state relative-caret-position="997">
+              <caret line="160" column="4" lean-forward="false" selection-start-line="160" selection-start-column="4" selection-end-line="160" selection-end-column="4" />
               <folding>
                 <element signature="e#15#24#0" expanded="true" />
                 <element signature="e#3987#5452#1" expanded="false" />
@@ -96,18 +96,6 @@
             <state relative-caret-position="470">
               <caret line="1639" column="0" lean-forward="false" selection-start-line="1639" selection-start-column="0" selection-end-line="1639" selection-end-column="0" />
               <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Z-lightgbm.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/single_model/xgb/Z-lightgbm.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2320">
-              <caret line="116" column="55" lean-forward="false" selection-start-line="116" selection-start-column="55" selection-end-line="116" selection-end-column="55" />
-              <folding>
-                <element signature="e#15#24#0" expanded="true" />
-              </folding>
             </state>
           </provider>
         </entry>
@@ -169,8 +157,8 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="-22" />
-    <option name="y" value="379" />
+    <option name="x" value="123" />
+    <option name="y" value="342" />
     <option name="width" value="1266" />
     <option name="height" value="1893" />
   </component>
@@ -579,15 +567,15 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-22" y="379" width="1266" height="1893" extended-state="0" />
+    <frame x="123" y="342" width="1266" height="1893" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3297328" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3297328" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.20056657" sideWeight="0.5065574" order="6" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32917848" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.20056657" sideWeight="0.49344262" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.21643059" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.17566799" sideWeight="0.4967213" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.17566799" sideWeight="0.4967213" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.09508197" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32917848" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -1040,16 +1028,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/single_model/xgb/Z-lightgbm.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2320">
-          <caret line="116" column="55" lean-forward="false" selection-start-line="116" selection-start-column="55" selection-end-line="116" selection-end-column="55" />
-          <folding>
-            <element signature="e#15#24#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///usr/local/lib/python2.7/dist-packages/xgboost-0.6-py2.7.egg/xgboost/training.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="550">
@@ -1072,14 +1050,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="452">
           <caret line="2330" column="0" lean-forward="false" selection-start-line="2330" selection-start-column="0" selection-end-line="2330" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file:///usr/local/lib/python2.7/dist-packages/pandas/core/indexes/base.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="470">
-          <caret line="1639" column="0" lean-forward="false" selection-start-line="1639" selection-start-column="0" selection-end-line="1639" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -1120,10 +1090,28 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/single_model/xgb/Z-lightgbm.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="940">
+          <caret line="116" column="55" lean-forward="false" selection-start-line="116" selection-start-column="55" selection-end-line="116" selection-end-column="55" />
+          <folding>
+            <element signature="e#15#24#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/lib/python2.7/dist-packages/pandas/core/indexes/base.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="470">
+          <caret line="1639" column="0" lean-forward="false" selection-start-line="1639" selection-start-column="0" selection-end-line="1639" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="746">
-          <caret line="164" column="23" lean-forward="false" selection-start-line="164" selection-start-column="23" selection-end-line="164" selection-end-column="23" />
+        <state relative-caret-position="997">
+          <caret line="160" column="4" lean-forward="false" selection-start-line="160" selection-start-column="4" selection-end-line="160" selection-end-column="4" />
           <folding>
             <element signature="e#15#24#0" expanded="true" />
             <element signature="e#3987#5452#1" expanded="false" />
