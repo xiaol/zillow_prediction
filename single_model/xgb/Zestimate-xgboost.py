@@ -88,7 +88,7 @@ df_train = get_features(df_train)
 df_train = prepare_data(df_train, one_hot_encode_cols)
 x_train = df_train
 
-
+''' 
 # outliers -----------------------------------------------
 outliers = x_train[x_train.logerror >= 0.419]
 print('Outliers:',outliers.shape)
@@ -125,6 +125,7 @@ xgb.plot_importance(ol_clf, max_num_features=200, height=0.8, ax=ax)
 plt.savefig('../../data/ol_importance.pdf')
 
 del df_ol_train, ol_train;gc.collect()
+'''
 
 # raw_input("Press Enter to continue ...")
 
@@ -173,7 +174,7 @@ res = xgb.cv(params, d_train, num_boost_round=2000, nfold=2,
                  early_stopping_rounds=100, verbose_eval=10, show_stdv=True)
 num_best_rounds = len(res)
 '''
-num_best_rounds = 520
+num_best_rounds = 570
 print("Number of rounds: {}".format(num_best_rounds))
 clf = xgb.train(params, d_train, num_best_rounds, watchlist, verbose_eval=10)  # watchlist,  early_stopping_rounds=100, verbose_eval=10)
 
@@ -221,16 +222,19 @@ for c in sub.columns[sub.columns != 'ParcelId']:
         d_test_cks = xgb.DMatrix(x_test_fold)
         p_test_cks = clf.predict(d_test_cks) # , ntree_limit=clf.best_ntree_limit)
 
+        '''
         ol_test_fold = x_test_fold.drop(zero_columns, axis=1)
         d_ol_test_cks = xgb.DMatrix(ol_test_fold)
         p_ol_test_cks = ol_clf.predict(d_ol_test_cks)/100.0
         print(p_ol_test_cks[:10])
         p_test_cks = p_test_cks + p_ol_test_cks
+        del d_ol_test_cks, ol_test_fold
+        '''
 
         p_test = np.append(p_test, p_test_cks)
 
-        del d_test_cks, d_ol_test_cks; gc.collect()
-        del df_test_fold, x_test_fold, ol_test_fold; gc.collect()
+        del d_test_cks; gc.collect()
+        del df_test_fold, x_test_fold; gc.collect()
 
     print(c)
 
