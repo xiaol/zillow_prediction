@@ -115,7 +115,7 @@ d_ol_train = xgb.DMatrix(ol_train, label=y_ol_train)
 
 print('Training classifier ...')
 
-# TODO if closer ,use binary logistic prob ,may undersample the typical.
+# TODO if closer ,use binary logistic prob ,may undersample the typical.and tune the parameters.
 ol_params = {'objective': 'binary:logistic', 'silent': 1, 'max_delta_step': 10}
 print(ol_params)
 
@@ -224,6 +224,7 @@ for c in sub.columns[sub.columns != 'ParcelId']:
         ol_test_fold = x_test_fold.drop(zero_columns, axis=1)
         d_ol_test_cks = xgb.DMatrix(ol_test_fold)
         p_ol_test_cks = ol_clf.predict(d_ol_test_cks)/100.0
+        print(p_ol_test_cks[:10])
         p_test_cks = p_test_cks + p_ol_test_cks
 
         p_test = np.append(p_test, p_test_cks)
