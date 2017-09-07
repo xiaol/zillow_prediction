@@ -50,6 +50,34 @@ def get_features(df):
                 'unitcnt', 'poolcnt']:
         df = merge_mean(df, ['loc_label'], col, 'loc_'+col+'_mean')
 
+    ''' TODO test lotsizesquarefeet
+structuretaxvaluedollarcnt
+longitude
+taxamount
+landtaxvaluedollarcnt
+latitude
+taxvaluedollarcnt
+calculatedfinishedsquarefeet
+yearbuilt
+region_property_num
+room_sqt
+transaction_month
+finishedsquarefeet12
+transaction_day
+rawcensustractandblock
+city_property_num
+censustractandblock
+extra_bathroom_cnt
+garagetotalsqft
+bedroomcnt
+bathroomcnt
+loc_label
+finishedsquarefeet15
+buildingqualitytypeid
+loc_finishedsquarefeet12_mean
+taxdelinquencyyear
+'''
+
     return df
 
 
@@ -163,7 +191,6 @@ print(params)
 
 watchlist = [(d_train, 'train')]
 # cross-validation
-# TODO bad news 0.0644361 higher than previous CV set, interesting. 858
 # remove cv. back to last point. and continue to test features.
 # fold 2 , 0.0643877, overfitting is working. 620+-,
 # 520 0.0643864  400 0.0644272
@@ -174,7 +201,7 @@ res = xgb.cv(params, d_train, num_boost_round=2000, nfold=2,
                  early_stopping_rounds=100, verbose_eval=10, show_stdv=True)
 num_best_rounds = len(res)
 '''
-num_best_rounds = 570
+num_best_rounds = 520
 print("Number of rounds: {}".format(num_best_rounds))
 clf = xgb.train(params, d_train, num_best_rounds, watchlist, verbose_eval=10)  # watchlist,  early_stopping_rounds=100, verbose_eval=10)
 
@@ -220,7 +247,7 @@ for c in sub.columns[sub.columns != 'ParcelId']:
         x_test_fold = x_test_fold[train_columns.tolist()]
 
         d_test_cks = xgb.DMatrix(x_test_fold)
-        p_test_cks = clf.predict(d_test_cks) # , ntree_limit=clf.best_ntree_limit)
+        p_test_cks = clf.predict(d_test_cks)  # , ntree_limit=clf.best_ntree_limit)
 
         '''
         ol_test_fold = x_test_fold.drop(zero_columns, axis=1)
