@@ -89,7 +89,7 @@ def chunks(l, n):
 print('Loading data ...')
 
 train = pd.read_csv('../../data/train_2016_v2.csv')
-prop = pd.read_csv('../../data/properties_2016.csv').fillna(0.0)  # , nrows=500)
+prop = pd.read_csv('../../data/properties_2016.csv')#  .fillna(-0.001)  # , nrows=500)
 sample = pd.read_csv('../../data/sample_submission.csv')
 '''
 print('Binding to float32')
@@ -201,7 +201,7 @@ res = xgb.cv(params, d_train, num_boost_round=2000, nfold=2,
                  early_stopping_rounds=100, verbose_eval=10, show_stdv=True)
 num_best_rounds = len(res)
 '''
-num_best_rounds = 220
+num_best_rounds = 300
 print("Number of rounds: {}".format(num_best_rounds))
 clf = xgb.train(params, d_train, num_best_rounds, watchlist, verbose_eval=10)  # watchlist,  early_stopping_rounds=100, verbose_eval=10)
 
