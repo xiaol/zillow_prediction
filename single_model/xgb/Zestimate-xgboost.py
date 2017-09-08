@@ -2,7 +2,7 @@
 import gc
 import os
 import sys
-from datetime import datetime
+from datetime import datetimea
 
 import xgboost as xgb
 
@@ -18,8 +18,13 @@ one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'bui
 
 
 def prepare_data(df, columns):
-    df = pd.get_dummies(df, columns=columns, prefix=columns, sparse=True)
+    df = pd.get_dummies(df, columns=columns, prefix=columns)  # sparse=True
+    zero_to_nan(df)
     return df
+
+
+def zero_to_nan(df):
+    df[df == 0] = np.nan
 
 
 def get_features(df):
