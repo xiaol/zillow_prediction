@@ -104,13 +104,14 @@ train = train[train.transactiondate < '2017-01-01']
 split = train[train.transactiondate < '2016-10-01'].shape[0]
 print(split)
 
-db = DBSCAN(eps=0.2, min_samples=25).fit(train[['latitude', 'longitude']])
-train.loc[:, 'loc_label'] = db.labels_
-num_clusters = len(set(db.labels_)) - (1 if -1 in db.labels_ else 0)
-print('Number of clusters: {}'.format(num_clusters))
 
 # ---------------------------------------------------------
 df_train = train.merge(prop, how='left', on='parcelid')
+
+db = DBSCAN(eps=0.2, min_samples=25).fit(df_train[['latitude', 'longitude']])
+df_train.loc[:, 'loc_label'] = db.labels_
+num_clusters = len(set(db.labels_)) - (1 if -1 in db.labels_ else 0)
+print('Number of clusters: {}'.format(num_clusters))
 
 df_train = get_features(df_train)
 df_train = prepare_data(df_train, one_hot_encode_cols)
