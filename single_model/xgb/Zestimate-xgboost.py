@@ -19,7 +19,7 @@ one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'bui
 
 def prepare_data(df, columns):
     df = pd.get_dummies(df, columns=columns, prefix=columns)  # sparse=True
-    zero_to_nan(df)
+    # zero_to_nan(df)
     return df
 
 
@@ -94,7 +94,7 @@ def chunks(l, n):
 print('Loading data ...')
 
 train = pd.read_csv('../../data/train_2016_v2.csv')
-prop = pd.read_csv('../../data/properties_2016.csv')#  .fillna(-0.001)  # , nrows=500)
+prop = pd.read_csv('../../data/properties_2016.csv').fillna(-0.001)  # , nrows=500)
 sample = pd.read_csv('../../data/sample_submission.csv')
 '''
 print('Binding to float32')
@@ -121,6 +121,7 @@ print(df_train['loc_label'].nunique())
 df_train = get_features(df_train)
 df_train = prepare_data(df_train, one_hot_encode_cols)
 x_train = df_train
+print(x_train.head(2))
 
 ''' 
 # outliers -----------------------------------------------
