@@ -18,13 +18,8 @@ one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'bui
 
 
 def prepare_data(df, columns):
-    df = pd.get_dummies(df, columns=columns, prefix=columns)  # sparse=True
-    # zero_to_nan(df)
+    df = pd.get_dummies(df, columns=columns, prefix=columns, sparse=True)
     return df
-
-
-def zero_to_nan(df):
-    df[df == 0] = np.nan
 
 
 def get_features(df):
@@ -36,7 +31,7 @@ def get_features(df):
     df = df.drop('transactiondate', axis=1)
     # df['tax_rt'] = df['taxamount'] / df['taxvaluedollarcnt']
     df['extra_bathroom_cnt'] = df['bathroomcnt'] - df['bedroomcnt']
-    df['room_sqt'] = df['calculatedfinishedsquarefeet']/(df['roomcnt'] + 1)
+    df['room_sqt'] = df['calculatedfinishedsquarefeet']/df['roomcnt']
     # df['structure_tax_rt'] = df['structuretaxvaluedollarcnt'] / df['taxvaluedollarcnt']
     '''
     df['land_tax_rt'] = df['landtaxvaluedollarcnt'] / df['taxvaluedollarcnt']
@@ -54,34 +49,6 @@ def get_features(df):
     for col in ['finishedsquarefeet12', 'garagetotalsqft', 'yearbuilt', 'calculatedfinishedsquarefeet', 'lotsizesquarefeet',
                 'unitcnt', 'poolcnt']:
         df = merge_mean(df, ['loc_label'], col, 'loc_'+col+'_mean')
-
-    ''' TODO test lotsizesquarefeet
-structuretaxvaluedollarcnt
-longitude
-taxamount
-landtaxvaluedollarcnt
-latitude
-taxvaluedollarcnt
-calculatedfinishedsquarefeet
-yearbuilt
-region_property_num
-room_sqt
-transaction_month
-finishedsquarefeet12
-transaction_day
-rawcensustractandblock
-city_property_num
-censustractandblock
-extra_bathroom_cnt
-garagetotalsqft
-bedroomcnt
-bathroomcnt
-loc_label
-finishedsquarefeet15
-buildingqualitytypeid
-loc_finishedsquarefeet12_mean
-taxdelinquencyyear
-'''
 
     return df
 
@@ -109,72 +76,29 @@ train = train[train.transactiondate < '2017-01-01']
 split = train[train.transactiondate < '2016-10-01'].shape[0]
 print(split)
 
-db = DBSCAN(eps=0.2, min_samples=25).fit(prop[['latitude', 'longitude']].fillna(0))
+train = train[train.logerror > -0.4]
+train = train[train.logerror < 0.419]
+
+
+db = DBSCAN(eps=0.2, min_samples=25).fit(prop[['latitude', 'longitude']])
 prop.loc[:, 'loc_label'] = db.labels_
 num_clusters = len(set(db.labels_)) - (1 if -1 in db.labels_ else 0)
 print('Number of clusters: {}'.format(num_clusters))
 
-
-# ---------------------------------------------------------
 df_train = train.merge(prop, how='left', on='parcelid')
-print(df_train['loc_label'].nunique())
-df_train = get_features(df_train)
-df_train = prepare_data(df_train, one_hot_encode_cols)
+
 x_train = df_train
-print(x_train.head(2))
+x_train = get_features(x_train)
+x_train = prepare_data(x_train, one_hot_encode_cols)
+x_train = x_train.drop(drop_cols, axis=1)
 
-''' 
-# outliers -----------------------------------------------
-outliers = x_train[x_train.logerror >= 0.419]
-print('Outliers:',outliers.shape)
-outliers_under = x_train[x_train.logerror <= -0.4]
-typical = x_train[(x_train.logerror > -0.4) & (x_train.logerror < 0.419)]
+train_columns = x_train.columns
 
-df_ol_train_1 = outliers.assign(classical=pd.Series(np.ones(outliers.shape[0]), index=outliers.index))
-zero_columns = list(df_ol_train_1.columns[(df_ol_train_1 == 0).all()])
-# print(zero_columns)
-df_ty_train_3 = typical.assign(classical=pd.Series(np.zeros(typical.shape[0]), index=typical.index))
+y_train = df_train['logerror'].values
+print(x_train.shape, y_train.shape)
+print x_train.columns
+pd.Series(list(x_train.columns)).to_csv('../../data/columns.csv')
 
-df_ol_train = pd.concat([df_ol_train_1, df_ty_train_3])
-
-ol_train = df_ol_train
-ol_train = ol_train.drop(drop_cols, axis=1)
-ol_train = ol_train.drop(['classical'], axis=1)
-ol_train = ol_train.drop(zero_columns, axis=1)
-
-y_ol_train = df_ol_train['classical'].values
-print(ol_train.shape, y_ol_train.shape)
-print ol_train.columns
-
-d_ol_train = xgb.DMatrix(ol_train, label=y_ol_train)
-
-print('Training classifier ...')
-
-# TODO if closer ,use binary logistic prob ,may undersample the typical.and tune the parameters.
-ol_params = {'objective': 'binary:logistic', 'silent': 1, 'max_delta_step': 10}
-print(ol_params)
-
-ol_clf = xgb.train(ol_params, d_ol_train, 500, [(d_ol_train, 'train')], verbose_eval=10)
-fig, ax = plt.subplots(figsize=(20,40))
-xgb.plot_importance(ol_clf, max_num_features=200, height=0.8, ax=ax)
-plt.savefig('../../data/ol_importance.pdf')
-
-del df_ol_train, ol_train;gc.collect()
-'''
-
-# raw_input("Press Enter to continue ...")
-
-# typical ------------------------------------------------
-tx_train = x_train[x_train.logerror > -0.4]
-tx_train = x_train[x_train.logerror < 0.419]
-
-ty_train = tx_train['logerror'].values
-tx_train = tx_train.drop(drop_cols, axis=1)
-
-train_columns = tx_train.columns
-print(tx_train.shape, ty_train.shape)
-print tx_train.columns
-pd.Series(list(tx_train.columns)).to_csv('../../data/columns.csv')
 
 del df_train; gc.collect()
 
@@ -184,11 +108,11 @@ del df_train; gc.collect()
 
 print('Building DMatrix...')
 
-d_train = xgb.DMatrix(tx_train, label=ty_train)
+d_train = xgb.DMatrix(x_train, label=y_train)
 # d_valid = xgb.DMatrix(x_valid, label=y_valid)
 
 # del x_train, x_valid; gc.collect()
-del tx_train; gc.collect()
+del x_train; gc.collect()
 
 print('Training ...')
 
@@ -198,18 +122,17 @@ print(params)
 
 watchlist = [(d_train, 'train')]
 # cross-validation
+# TODO bad news 0.0644361 higher than previous CV set, interesting. 858
 # remove cv. back to last point. and continue to test features.
-# fold 2 , 0.0643877, overfitting is working. 620+-,
-# 520 0.0643864  400 0.0644272
-# TODO test 570
+# fold 2 , 0.0643877, overfitting is working. 620+-
 '''
 rint("Running XGBoost CV....")
 res = xgb.cv(params, d_train, num_boost_round=2000, nfold=2,
                  early_stopping_rounds=100, verbose_eval=10, show_stdv=True)
 num_best_rounds = len(res)
+print("Number of best rounds: {}".format(num_best_rounds))
 '''
 num_best_rounds = 520
-print("Number of rounds: {}".format(num_best_rounds))
 clf = xgb.train(params, d_train, num_best_rounds, watchlist, verbose_eval=10)  # watchlist,  early_stopping_rounds=100, verbose_eval=10)
 
 fig, ax = plt.subplots(figsize=(20,40))
@@ -217,14 +140,14 @@ xgb.plot_importance(clf, max_num_features=200, height=0.8, ax=ax)
 plt.savefig('../../data/importance.pdf')
 # del d_train, d_valid
 del d_train
-# typical ------------------------------------------------------------------------
 
 print('Building test set ...')
+
+print('Predicting on test ...')
 sub = pd.read_csv('../../data/sample_submission.csv')
 sample['parcelid'] = sample['ParcelId']
 print(sample.shape)
 
-print('Predicting on test ...')
 for c in sub.columns[sub.columns != 'ParcelId']:
     if c > '201709':
         sub[c] = p_test
@@ -254,16 +177,7 @@ for c in sub.columns[sub.columns != 'ParcelId']:
         x_test_fold = x_test_fold[train_columns.tolist()]
 
         d_test_cks = xgb.DMatrix(x_test_fold)
-        p_test_cks = clf.predict(d_test_cks)  # , ntree_limit=clf.best_ntree_limit)
-
-        '''
-        ol_test_fold = x_test_fold.drop(zero_columns, axis=1)
-        d_ol_test_cks = xgb.DMatrix(ol_test_fold)
-        p_ol_test_cks = ol_clf.predict(d_ol_test_cks)/100.0
-        print(p_ol_test_cks[:10])
-        p_test_cks = p_test_cks + p_ol_test_cks
-        del d_ol_test_cks, ol_test_fold
-        '''
+        p_test_cks = clf.predict(d_test_cks) # , ntree_limit=clf.best_ntree_limit)
 
         p_test = np.append(p_test, p_test_cks)
 
@@ -296,3 +210,4 @@ sub.to_csv(file_path, index=False, float_format='%.4f')
 # 0.0644258 add loc_label , loc_quality_median, loc_building_num  [485]   train-mae:0.051334      valid-mae:0.052187
 
 # Thanks to @inversion
+
