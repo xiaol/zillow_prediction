@@ -67,7 +67,7 @@ def chunks(l, n):
 print('Loading data ...')
 
 train = pd.read_csv('../../data/train_2016_v2.csv')
-prop = pd.read_csv('../../data/properties_2016.csv').fillna(0)  # , nrows=500)
+prop = pd.read_csv('../../data/properties_2016.csv').fillna(-0.001)  # , nrows=500)
 sample = pd.read_csv('../../data/sample_submission.csv')
 
 string_cols = []
@@ -101,7 +101,7 @@ x_train = x_train.drop(drop_cols, axis=1)
 
 x_train = x_train.drop('transactiondate', axis=1)
 x_train = x_train.drop(string_cols, axis=1)
-# x_train = x_train[x_train.columns.tolist()[:]]
+x_train = x_train.drop('censustractandblock', axis=1)
 
 train_columns = x_train.columns
 
@@ -118,7 +118,7 @@ x_train, y_train, x_valid, y_valid = x_train[:split], y_train[:split], x_train[s
 
 print('Training ...')
 
-model_dir = "../../data/model/"
+model_dir = "../../data/model1/"
 
 numeric_cols = set(train_columns)-set(string_cols)
 feature_cols = [tf.feature_column.numeric_column(k) for k in numeric_cols]
@@ -126,7 +126,7 @@ feature_category_cols = [tf.feature_column.categorical_column_with_hash_bucket(k
 feature_category_cols_emb = [tf.feature_column.embedding_column(k, dimension=8) for k in feature_category_cols]
 # feature_cols.extend(feature_category_cols_emb)
 
-regressor = tf.estimator.DNNRegressor(feature_columns=feature_cols, hidden_units=[64, 64], model_dir=model_dir)
+regressor = tf.estimator.DNNRegressor(feature_columns=feature_cols, hidden_units=[20, 10], model_dir=model_dir)
 
 LABEL = 'logerror'
 
