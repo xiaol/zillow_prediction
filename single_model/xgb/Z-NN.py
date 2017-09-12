@@ -19,6 +19,10 @@ drop_cols = ['logerror','parcelid']
 one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid', 'fips']
 
 
+def MAE(yhat, y):
+    return np.sum([abs(yhat[i] - y[i]) for i in range(len(yhat))]) / len(yhat)
+
+
 def prepare_data(df, columns):
     df = pd.get_dummies(df, columns=columns, prefix=columns, sparse=True)
     return df
@@ -67,7 +71,7 @@ def chunks(l, n):
 print('Loading data ...')
 
 train = pd.read_csv('../../data/train_2016_v2.csv')
-prop = pd.read_csv('../../data/properties_2016.csv').fillna(-0.001)  # , nrows=500)
+prop = pd.read_csv('../../data/properties_2016.csv').fillna(-1)  # , nrows=500)
 sample = pd.read_csv('../../data/sample_submission.csv')
 
 string_cols = []
@@ -85,6 +89,8 @@ print(split)
 train = train[train.logerror > -0.4]
 train = train[train.logerror < 0.419]
 
+prop['latitude'] = prop['latitude']*1e-6
+prop['longitude'] = prop['longitude']*1e-6
 
 db = DBSCAN(eps=0.2, min_samples=25).fit(prop[['latitude', 'longitude']])
 prop.loc[:, 'loc_label'] = db.labels_
@@ -99,11 +105,18 @@ x_train = df_train
 # x_train = prepare_data(x_train, one_hot_encode_cols)
 x_train = x_train.drop(drop_cols, axis=1)
 
+x_train['transactiondate'] = pd.to_datetime(x_train['transactiondate'])
+x_train['transaction_month'] = x_train['transactiondate'].dt.month.astype(np.int8)
+x_train['transaction_day'] = x_train['transactiondate'].dt.weekday.astype(np.int8)
 x_train = x_train.drop('transactiondate', axis=1)
+
 x_train = x_train.drop(string_cols, axis=1)
-x_train = x_train.drop('censustractandblock', axis=1)
+# x_train = x_train.drop('censustractandblock', axis=1)
 
 train_columns = x_train.columns
+numeric_cols = set(train_columns)-set(string_cols)
+for n_col in numeric_cols:
+    x_train[n_col] = (x_train[n_col] - np.mean(x_train[n_col])) / (np.std(x_train[n_col]) + 1)
 
 y_train = df_train['logerror'].values
 print(x_train.shape, y_train.shape)
@@ -118,15 +131,14 @@ x_train, y_train, x_valid, y_valid = x_train[:split], y_train[:split], x_train[s
 
 print('Training ...')
 
-model_dir = "../../data/model1/"
+model_dir = "../../data/model11/"
 
-numeric_cols = set(train_columns)-set(string_cols)
 feature_cols = [tf.feature_column.numeric_column(k) for k in numeric_cols]
-feature_category_cols = [tf.feature_column.categorical_column_with_hash_bucket(k, hash_bucket_size=1000) for k in string_cols]
+feature_category_cols = [tf.feature_column.categorical_column_with_hash_bucket(k, hash_bucket_size=1000) for k in ['hashottuborspa', 'propertycountylandusecode']]
 feature_category_cols_emb = [tf.feature_column.embedding_column(k, dimension=8) for k in feature_category_cols]
 # feature_cols.extend(feature_category_cols_emb)
-
-regressor = tf.estimator.DNNRegressor(feature_columns=feature_cols, hidden_units=[20, 10], model_dir=model_dir)
+print(len(feature_cols))
+regressor = tf.estimator.DNNRegressor(feature_columns=feature_cols, hidden_units=[1024,512, 256], model_dir=model_dir)
 
 LABEL = 'logerror'
 
@@ -152,6 +164,8 @@ y = regressor.predict(
 # predictions
 predictions = list(p["predictions"][0] for p in itertools.islice(y, x_valid.shape[0]))
 print("Predictions: {}".format(str(predictions)))
+mae = MAE(y_valid, predictions)
+print("Valid MAE: {}".format(mae))
 
 raw_input("Enter something to continue ...")
 print('Building test set ...')

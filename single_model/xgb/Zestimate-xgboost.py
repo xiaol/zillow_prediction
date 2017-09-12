@@ -79,8 +79,8 @@ print(split)
 train = train[train.logerror > -0.4]
 train = train[train.logerror < 0.419]
 
-prop['latitude'] = prop['latitude']/1e-6
-prop['longitude'] = prop['longitude']/1e-6
+prop['latitude'] = prop['latitude']*1e-6
+prop['longitude'] = prop['longitude']*1e-6
 
 
 db = DBSCAN(eps=5/6371., min_samples=5, algorithm='ball_tree', metric='haversine').fit(np.radians(prop[['latitude', 'longitude']]))
@@ -88,6 +88,7 @@ prop.loc[:, 'loc_label'] = db.labels_
 print(np.sum(db.labels_ == -1))
 num_clusters = len(set(db.labels_)) - (1 if -1 in db.labels_ else 0)
 print('Number of clusters: {}'.format(num_clusters))
+prop[['parcelid', 'loc_label']].to_csv('../../data/loc_label.csv')
 
 df_train = train.merge(prop, how='left', on='parcelid')
 
