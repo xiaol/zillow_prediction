@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 import itertools
 
+from sklearn import preprocessing
 
 drop_cols = ['logerror','parcelid']
 one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid', 'fips']
@@ -99,17 +100,17 @@ prop = prop.merge(df_coor, how='left', on='parcelid')
 df_coor = pd.DataFrame(df_coor.groupby(['lati', 'longi'])['parcelid'].count()).reset_index()
 df_coor.rename(columns={'parcelid': 'sum_weight'}, inplace=True)
 print(df_coor.shape)
-
-db = DBSCAN(eps=3/6371., min_samples=1, algorithm='ball_tree',
+'''
+db = DBSCAN(eps=2/6371., min_samples=1, algorithm='ball_tree',
             metric='haversine').fit(np.radians(df_coor[['lati', 'longi']]), sample_weight=df_coor['sum_weight'].values)
 df_coor.loc[:, 'loc_label'] = db.labels_
 print(np.sum(db.labels_ == -1))
 num_clusters = len(set(db.labels_)) - (1 if -1 in db.labels_ else 0)
 print('Number of clusters: {}'.format(num_clusters))
-
+'''
 prop = prop.merge(df_coor, how='left', on=['lati', 'longi'])
-prop = prop.drop(['lati','longi', 'sum_weight'], axis=1)
-prop[['parcelid', 'loc_label']].to_csv('../../data/loc_label.csv')
+prop = prop.drop(['lati','longi'], axis=1)
+# prop[['parcelid', 'loc_label']].to_csv('../../data/loc_label.csv')
 
 df_train = train.merge(prop, how='left', on='parcelid')
 
@@ -123,11 +124,15 @@ x_train['transaction_month'] = x_train['transactiondate'].dt.month.astype(np.int
 x_train['transaction_day'] = x_train['transactiondate'].dt.weekday.astype(np.int8)
 x_train = x_train.drop('transactiondate', axis=1)
 
-x_train = x_train.drop(string_cols, axis=1)
+test_string_cols = ['propertycountylandusecode']
+for str_col in string_cols:
+    le = preprocessing.LabelEncoder()
+    x_train[str_col] = le.fit_transform(x_train[str_col])
+
 # x_train = x_train.drop('censustractandblock', axis=1)
 
 train_columns = x_train.columns
-numeric_cols = set(train_columns)-set(string_cols)
+numeric_cols = set(train_columns)-set(string_cols)-set(test_string_cols)
 for n_col in numeric_cols:
     x_train[n_col] = (x_train[n_col] - np.mean(x_train[n_col])) / (np.std(x_train[n_col]) + 1)
 
@@ -144,12 +149,12 @@ x_train, y_train, x_valid, y_valid = x_train[:split], y_train[:split], x_train[s
 
 print('Training ...')
 
-model_dir = "../../data/model11/"
+model_dir = "../../data/model13/"
 
 feature_cols = [tf.feature_column.numeric_column(k) for k in numeric_cols]
-feature_category_cols = [tf.feature_column.categorical_column_with_hash_bucket(k, hash_bucket_size=1000) for k in ['hashottuborspa', 'propertycountylandusecode']]
+feature_category_cols = [tf.feature_column.categorical_column_with_hash_bucket(k, hash_bucket_size=1000, dtype=tf.int64) for k in string_cols]
 feature_category_cols_emb = [tf.feature_column.embedding_column(k, dimension=8) for k in feature_category_cols]
-# feature_cols.extend(feature_category_cols_emb)
+feature_cols.extend(feature_category_cols_emb)
 print(len(feature_cols))
 regressor = tf.estimator.DNNRegressor(feature_columns=feature_cols, hidden_units=[1024,512, 256], model_dir=model_dir)
 
