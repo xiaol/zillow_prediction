@@ -87,8 +87,9 @@ df_coor = df_coor.round(3)
 df_coor.rename(columns={'latitude':'lati', 'longitude':'longi'}, inplace=True)
 prop = prop.merge(df_coor, how='left', on='parcelid')
 df_coor = pd.DataFrame(df_coor.groupby(['lati', 'longi'])['parcelid'].count()).reset_index()
+print(df_coor.shape)
 
-db = DBSCAN(eps=5/6371., min_samples=5, algorithm='ball_tree',
+db = DBSCAN(eps=5/6371., min_samples=1, algorithm='ball_tree',
             metric='haversine').fit(np.radians(df_coor[['lati', 'longi']]), sample_weight=df_coor['parcelid'].values)
 df_coor.loc[:, 'loc_label'] = db.labels_
 print(np.sum(db.labels_ == -1))
