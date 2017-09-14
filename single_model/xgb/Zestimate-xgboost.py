@@ -82,12 +82,21 @@ train = train[train.logerror < 0.419]
 prop['latitude'] = prop['latitude']*1e-6
 prop['longitude'] = prop['longitude']*1e-6
 
+df_coor = prop[['parcelid', 'latitude', 'longitude']]
+df_coor = df_coor.round(3)
+df_coor.rename(columns={'latitude':'lati', 'longitude':'longi'}, inplace=True)
+prop = prop.merge(df_coor, how='left', on='parcelid')
+df_coor = pd.DataFrame(df_coor.groupby(['lati', 'longi'])['parcelid'].count()).reset_index()
 
-db = DBSCAN(eps=5/6371., min_samples=5, algorithm='ball_tree', metric='haversine').fit(np.radians(prop[['latitude', 'longitude']]))
-prop.loc[:, 'loc_label'] = db.labels_
+db = DBSCAN(eps=5/6371., min_samples=5, algorithm='ball_tree',
+            metric='haversine').fit(np.radians(df_coor[['lati', 'longi']]), sample_weight=df_coor['parcelid'].values)
+df_coor.loc[:, 'loc_label'] = db.labels_
 print(np.sum(db.labels_ == -1))
 num_clusters = len(set(db.labels_)) - (1 if -1 in db.labels_ else 0)
 print('Number of clusters: {}'.format(num_clusters))
+
+prop = prop.merge(df_coor, how='left', on=['lati', 'longi'])
+prop.drop(['lati','longi'], axis=True)
 prop[['parcelid', 'loc_label']].to_csv('../../data/loc_label.csv')
 
 df_train = train.merge(prop, how='left', on='parcelid')

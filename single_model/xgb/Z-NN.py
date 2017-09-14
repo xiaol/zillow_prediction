@@ -89,10 +89,10 @@ print(split)
 train = train[train.logerror > -0.4]
 train = train[train.logerror < 0.419]
 
-prop['latitude'] = prop['latitude']*1e-6
-prop['longitude'] = prop['longitude']*1e-6
+prop['latitude'] = prop['latitude']
+prop['longitude'] = prop['longitude']
 
-db = DBSCAN(eps=0.2, min_samples=25).fit(prop[['latitude', 'longitude']])
+db = DBSCAN(eps=20000, min_samples=25).fit(prop[['latitude', 'longitude']])
 prop.loc[:, 'loc_label'] = db.labels_
 print(np.sum(db.labels_ == -1))
 num_clusters = len(set(db.labels_)) - (1 if -1 in db.labels_ else 0)
