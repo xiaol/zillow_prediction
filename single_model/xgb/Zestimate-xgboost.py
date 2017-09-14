@@ -96,7 +96,7 @@ num_clusters = len(set(db.labels_)) - (1 if -1 in db.labels_ else 0)
 print('Number of clusters: {}'.format(num_clusters))
 
 prop = prop.merge(df_coor, how='left', on=['lati', 'longi'])
-prop.drop(['lati','longi'], axis=True)
+prop.drop(['lati','longi'], axis=1)
 prop[['parcelid', 'loc_label']].to_csv('../../data/loc_label.csv')
 
 df_train = train.merge(prop, how='left', on='parcelid')
