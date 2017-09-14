@@ -89,8 +89,9 @@ prop = prop.merge(df_coor, how='left', on='parcelid')
 df_coor = pd.DataFrame(df_coor.groupby(['lati', 'longi'])['parcelid'].count()).reset_index()
 df_coor.rename(columns={'parcelid': 'sum_weight'}, inplace=True)
 print(df_coor.shape)
+print(len(set(df_coor['sum_weight'])))
 
-db = DBSCAN(eps=3/6371., min_samples=1, algorithm='ball_tree',
+db = DBSCAN(eps=2/6371., min_samples=1, algorithm='ball_tree',
             metric='haversine').fit(np.radians(df_coor[['lati', 'longi']]), sample_weight=df_coor['sum_weight'].values)
 df_coor.loc[:, 'loc_label'] = db.labels_
 print(np.sum(db.labels_ == -1))
@@ -98,7 +99,7 @@ num_clusters = len(set(db.labels_)) - (1 if -1 in db.labels_ else 0)
 print('Number of clusters: {}'.format(num_clusters))
 
 prop = prop.merge(df_coor, how='left', on=['lati', 'longi'])
-prop = prop.drop(['lati','longi', 'sum_weight'], axis=1)
+prop = prop.drop(['lati','longi'], axis=1)
 prop[['parcelid', 'loc_label']].to_csv('../../data/loc_label.csv')
 
 df_train = train.merge(prop, how='left', on='parcelid')
