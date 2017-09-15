@@ -174,7 +174,6 @@ y = regressor.predict(
 # .predict() returns an iterator of dicts; convert to a list and print
 # predictions
 predictions = list(p["predictions"][0] for p in itertools.islice(y, x_valid.shape[0]))
-print("Predictions: {}".format(str(predictions)))
 mae = MAE(y_valid, predictions)
 print("Valid MAE: {}".format(mae))
 
