@@ -142,14 +142,14 @@ x_train, y_train, x_valid, y_valid = x_train[:split], y_train[:split], x_train[s
 
 print('Training ...')
 
-model_dir = "../../data/model15/"
+model_dir = "../../data/model/"
 
 feature_cols = [tf.feature_column.numeric_column(k) for k in numeric_cols]
 feature_category_cols = [tf.feature_column.categorical_column_with_hash_bucket(k, hash_bucket_size=1000, dtype=tf.int64) for k in string_cols]
 feature_category_cols_emb = [tf.feature_column.embedding_column(k, dimension=8) for k in feature_category_cols]
 feature_cols.extend(feature_category_cols_emb)
 print(len(feature_cols))
-regressor = tf.estimator.DNNRegressor(feature_columns=feature_cols, hidden_units=[1024,1024,512,512,256,128,128,128, 256,256,128], model_dir=model_dir)
+regressor = tf.estimator.DNNRegressor(feature_columns=feature_cols, hidden_units=[1024,512,512,256,128,128,128, 256,256,128], model_dir=model_dir)
 
 LABEL = 'logerror'
 
@@ -216,7 +216,7 @@ for c in sub.columns[sub.columns != 'ParcelId']:
         x_test_fold = x_test_fold[train_columns.tolist()]
 
         # predict p_test_cks with x_test_fold
-        p_test_iter = regressor.predict(input_fn=get_input_fn(x_test_fold, [0]*x_test_fold.shape[0]), num_epochs=1, shuffle=False)
+        p_test_iter = regressor.predict(input_fn=get_input_fn(x_test_fold, [0]*x_test_fold.shape[0], num_epochs=1, shuffle=False))
 
         p_test_cks = list(p["predictions"][0] for p in itertools.islice(p_test_iter, x_test_fold.shape[0]))
         p_test = np.append(p_test, p_test_cks)
