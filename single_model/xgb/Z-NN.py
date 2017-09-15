@@ -100,14 +100,13 @@ prop = prop.merge(df_coor, how='left', on='parcelid')
 df_coor = pd.DataFrame(df_coor.groupby(['lati', 'longi'])['parcelid'].count()).reset_index()
 df_coor.rename(columns={'parcelid': 'sum_weight'}, inplace=True)
 print(df_coor.shape)
-'''
-db = DBSCAN(eps=2/6371., min_samples=1, algorithm='ball_tree',
+
+db = DBSCAN(eps=1/6371., min_samples=1, algorithm='ball_tree',
             metric='haversine').fit(np.radians(df_coor[['lati', 'longi']]), sample_weight=df_coor['sum_weight'].values)
 df_coor.loc[:, 'loc_label'] = db.labels_
 print(np.sum(db.labels_ == -1))
 num_clusters = len(set(db.labels_)) - (1 if -1 in db.labels_ else 0)
 print('Number of clusters: {}'.format(num_clusters))
-'''
 prop = prop.merge(df_coor, how='left', on=['lati', 'longi'])
 prop = prop.drop(['lati','longi'], axis=1)
 # prop[['parcelid', 'loc_label']].to_csv('../../data/loc_label.csv')
@@ -115,7 +114,7 @@ prop = prop.drop(['lati','longi'], axis=1)
 df_train = train.merge(prop, how='left', on='parcelid')
 
 x_train = df_train
-# x_train = get_features(x_train)
+x_train = get_features(x_train)
 # x_train = prepare_data(x_train, one_hot_encode_cols)
 x_train = x_train.drop(drop_cols, axis=1)
 
@@ -156,7 +155,7 @@ feature_category_cols = [tf.feature_column.categorical_column_with_hash_bucket(k
 feature_category_cols_emb = [tf.feature_column.embedding_column(k, dimension=8) for k in feature_category_cols]
 feature_cols.extend(feature_category_cols_emb)
 print(len(feature_cols))
-regressor = tf.estimator.DNNRegressor(feature_columns=feature_cols, hidden_units=[1024,512,256,128,128,128], model_dir=model_dir)
+regressor = tf.estimator.DNNRegressor(feature_columns=feature_cols, hidden_units=[1024,1024,512,512,256,128,128,128, 256,256,128], model_dir=model_dir)
 
 LABEL = 'logerror'
 
