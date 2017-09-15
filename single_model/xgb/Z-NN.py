@@ -105,9 +105,11 @@ x_train = get_features(x_train)
 # x_train = prepare_data(x_train, one_hot_encode_cols)
 x_train = x_train.drop(drop_cols, axis=1)
 
+le_dict = {}
 for str_col in string_cols:
     le = preprocessing.LabelEncoder()
     x_train[str_col] = le.fit_transform(x_train[str_col])
+    le_dict[str_col] = le
 
 # x_train = x_train.drop('censustractandblock', axis=1)
 
@@ -202,8 +204,7 @@ for c in sub.columns[sub.columns != 'ParcelId']:
         x_test_fold = x_test_fold[train_columns.tolist()]
 
         for str_col in string_cols:
-            le = preprocessing.LabelEncoder()
-            x_test_fold[str_col] = le.fit_transform(x_test_fold[str_col])
+            x_test_fold[str_col] = le_dict[str_col].transform(x_test_fold[str_col])
 
         for n_col in numeric_cols:
             x_test_fold[n_col] = (x_test_fold[n_col] - np.mean(x_test_fold[n_col])) / (np.std(x_test_fold[n_col]) + 1)

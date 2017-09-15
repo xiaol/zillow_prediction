@@ -8,7 +8,7 @@ import xgboost as xgb
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from util import *
-from sklearn.cluster import DBSCAN
+from sklearn.cluster import DBSCAN, Birch
 import matplotlib
 matplotlib.use('pdf')
 import matplotlib.pyplot as plt
@@ -38,7 +38,7 @@ def get_features(df):
     '''
 
     # 商圈内待售房屋数量
-    # df = merge_nunique(df, ['loc_label'], 'parcelid', 'loc_building_num')
+    df = merge_nunique(df, ['loc_label'], 'parcelid', 'loc_building_num')
     df = merge_nunique(df, ['regionidzip'], 'parcelid', 'region_property_num')
     df = merge_nunique(df, ['regionidcity'], 'parcelid', 'city_property_num')
     # df = merge_nunique(df, ['regionidcounty'], 'parcelid', 'county_property_num')
@@ -46,11 +46,9 @@ def get_features(df):
     # df = merge_count(df, ['transaction_month','regionidcity'], 'parcelid', 'city_month_transaction_count')
     # 商圈房屋状况均值
     # df = merge_median(df, ['regionidcity'], 'buildingqualitytypeid', 'city_quality_median')
-    '''
     for col in ['finishedsquarefeet12', 'garagetotalsqft', 'yearbuilt', 'calculatedfinishedsquarefeet', 'lotsizesquarefeet',
                 'unitcnt', 'poolcnt']:
         df = merge_mean(df, ['loc_label'], col, 'loc_'+col+'_mean')
-    '''
     return df
 
 
@@ -80,7 +78,9 @@ print(split)
 train = train[train.logerror > -0.4]
 train = train[train.logerror < 0.419]
 
-
+brc = Birch(branching_factor=50, n_clusters=None, threshold=0.03, compute_labels=True)
+prop['loc_label'] = brc.fit_predict(prop[['latitude', 'longitude']])
+print('Number of loc label: {}'.format(len(set(prop['loc_label']))))
 # TODO loc label
 df_train = train.merge(prop, how='left', on='parcelid')
 
