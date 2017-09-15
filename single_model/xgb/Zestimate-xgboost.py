@@ -78,6 +78,9 @@ print(split)
 train = train[train.logerror > -0.4]
 train = train[train.logerror < 0.419]
 
+prop['latitude'] = prop['latitude']*1e-6
+prop['longitude'] = prop['longitude']*1e-6
+
 brc = Birch(branching_factor=50, n_clusters=None, threshold=0.03, compute_labels=True)
 prop['loc_label'] = brc.fit_predict(prop[['latitude', 'longitude']])
 print('Number of loc label: {}'.format(len(set(prop['loc_label']))))
