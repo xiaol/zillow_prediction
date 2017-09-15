@@ -118,12 +118,6 @@ x_train = get_features(x_train)
 # x_train = prepare_data(x_train, one_hot_encode_cols)
 x_train = x_train.drop(drop_cols, axis=1)
 
-x_train['transactiondate'] = pd.to_datetime(x_train['transactiondate'])
-x_train['transaction_month'] = x_train['transactiondate'].dt.month.astype(np.int8)
-x_train['transaction_day'] = x_train['transactiondate'].dt.weekday.astype(np.int8)
-x_train = x_train.drop('transactiondate', axis=1)
-
-test_string_cols = ['propertycountylandusecode']
 for str_col in string_cols:
     le = preprocessing.LabelEncoder()
     x_train[str_col] = le.fit_transform(x_train[str_col])
@@ -131,7 +125,7 @@ for str_col in string_cols:
 # x_train = x_train.drop('censustractandblock', axis=1)
 
 train_columns = x_train.columns
-numeric_cols = set(train_columns)-set(string_cols)-set(test_string_cols)
+numeric_cols = set(train_columns)-set(string_cols)
 for n_col in numeric_cols:
     x_train[n_col] = (x_train[n_col] - np.mean(x_train[n_col])) / (np.std(x_train[n_col]) + 1)
 
