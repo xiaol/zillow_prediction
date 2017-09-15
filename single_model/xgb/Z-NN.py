@@ -6,7 +6,7 @@ from datetime import datetime
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from util import *
-from sklearn.cluster import DBSCAN
+from sklearn.cluster import DBSCAN, Birch
 import matplotlib
 matplotlib.use('pdf')
 import matplotlib.pyplot as plt
@@ -93,23 +93,10 @@ train = train[train.logerror < 0.419]
 prop['latitude'] = prop['latitude']*1e-6
 prop['longitude'] = prop['longitude']*1e-6
 
-df_coor = prop[['parcelid', 'latitude', 'longitude']]
-df_coor = df_coor.round(3)
-df_coor.rename(columns={'latitude':'lati', 'longitude':'longi'}, inplace=True)
-prop = prop.merge(df_coor, how='left', on='parcelid')
-df_coor = pd.DataFrame(df_coor.groupby(['lati', 'longi'])['parcelid'].count()).reset_index()
-df_coor.rename(columns={'parcelid': 'sum_weight'}, inplace=True)
-print(df_coor.shape)
 
-db = DBSCAN(eps=1/6371., min_samples=1, algorithm='ball_tree',
-            metric='haversine').fit(np.radians(df_coor[['lati', 'longi']]), sample_weight=df_coor['sum_weight'].values)
-df_coor.loc[:, 'loc_label'] = db.labels_
-print(np.sum(db.labels_ == -1))
-num_clusters = len(set(db.labels_)) - (1 if -1 in db.labels_ else 0)
-print('Number of clusters: {}'.format(num_clusters))
-prop = prop.merge(df_coor, how='left', on=['lati', 'longi'])
-prop = prop.drop(['lati','longi'], axis=1)
-# prop[['parcelid', 'loc_label']].to_csv('../../data/loc_label.csv')
+brc = Birch(branching_factor=50, n_clusters=None, threshold=0.03, compute_labels=True)
+prop['loc_label'] = brc.fit_predict(prop[['latitude', 'longitude']])
+print('Number of loc label: {}'.format(len(set(prop['loc_label']))))
 
 df_train = train.merge(prop, how='left', on='parcelid')
 
@@ -142,7 +129,7 @@ x_train, y_train, x_valid, y_valid = x_train[:split], y_train[:split], x_train[s
 
 print('Training ...')
 
-model_dir = "../../data/model/"
+model_dir = "../../data/model2/"
 
 feature_cols = [tf.feature_column.numeric_column(k) for k in numeric_cols]
 feature_category_cols = [tf.feature_column.categorical_column_with_hash_bucket(k, hash_bucket_size=1000, dtype=tf.int64) for k in string_cols]
@@ -202,7 +189,7 @@ for c in sub.columns[sub.columns != 'ParcelId']:
         df_test_fold['transactiondate'] = transactiondate
         x_test_fold = get_features(df_test_fold)
 
-        x_test_fold = prepare_data(x_test_fold, one_hot_encode_cols)
+        # x_test_fold = prepare_data(x_test_fold, one_hot_encode_cols)
         # transactiondate = '2017-12-01'
 
         sub_cols = set(train_columns).intersection(set(x_test_fold.columns))
@@ -213,6 +200,13 @@ for c in sub.columns[sub.columns != 'ParcelId']:
                 x_test_fold[train_col] = pd.Series(np.zeros((sLength)), index=x_test_fold.index)
 
         x_test_fold = x_test_fold[train_columns.tolist()]
+
+        for str_col in string_cols:
+            le = preprocessing.LabelEncoder()
+            x_test_fold[str_col] = le.fit_transform(x_test_fold[str_col])
+
+        for n_col in numeric_cols:
+            x_test_fold[n_col] = (x_test_fold[n_col] - np.mean(x_test_fold[n_col])) / (np.std(x_test_fold[n_col]) + 1)
 
         # predict p_test_cks with x_test_fold
         p_test_iter = regressor.predict(input_fn=get_input_fn(x_test_fold, [0]*x_test_fold.shape[0], num_epochs=1, shuffle=False))
