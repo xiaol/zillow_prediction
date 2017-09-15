@@ -177,7 +177,7 @@ predictions = list(p["predictions"][0] for p in itertools.islice(y, x_valid.shap
 mae = MAE(y_valid, predictions)
 print("Valid MAE: {}".format(mae))
 
-raw_input("Enter something to continue ...")
+# raw_input("Enter something to continue ...")
 print('Building test set ...')
 
 print('Predicting on test ...')
