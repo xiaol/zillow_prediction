@@ -81,6 +81,9 @@ for c, dtype in zip(prop.columns, prop.dtypes):
         # prop[c] = prop[c].astype(np.int32)  # categorical_column_with_hash_bucket only support string and int
         string_cols.append(c)
 
+string_cols.extend(one_hot_encode_cols)
+string_cols = set(string_cols)
+
 print('Creating training set ...')
 train = train.sort_values('transactiondate')
 train = train[train.transactiondate < '2017-01-01']
@@ -108,7 +111,8 @@ x_train = x_train.drop(drop_cols, axis=1)
 le_dict = {}
 for str_col in string_cols:
     le = preprocessing.LabelEncoder()
-    x_train[str_col] = le.fit_transform(x_train[str_col])
+    le.fit(prop[str_col])
+    x_train[str_col] = le.transform(x_train[str_col])
     le_dict[str_col] = le
 
 # x_train = x_train.drop('censustractandblock', axis=1)
@@ -132,6 +136,7 @@ x_train, y_train, x_valid, y_valid = x_train[:split], y_train[:split], x_train[s
 print('Training ...')
 
 model_dir = "../../data/model2/"
+
 
 feature_cols = [tf.feature_column.numeric_column(k) for k in numeric_cols]
 feature_category_cols = [tf.feature_column.categorical_column_with_hash_bucket(k, hash_bucket_size=1000, dtype=tf.int64) for k in string_cols]
