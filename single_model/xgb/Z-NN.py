@@ -121,10 +121,8 @@ for str_col in string_cols:
 
 train_columns = x_train.columns
 numeric_cols = set(train_columns)-set(string_cols)
-'''
 for n_col in numeric_cols:
     x_train[n_col] = (x_train[n_col] - np.mean(x_train[n_col])) / (np.std(x_train[n_col]) + 1)
-'''
 
 y_train = df_train['logerror'].values
 print(x_train.shape, y_train.shape)
