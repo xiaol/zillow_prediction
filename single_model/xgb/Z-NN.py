@@ -16,6 +16,8 @@ import itertools
 
 from sklearn import preprocessing
 
+import selu
+
 drop_cols = ['logerror','parcelid']
 one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid', 'fips']
 
@@ -119,8 +121,10 @@ for str_col in string_cols:
 
 train_columns = x_train.columns
 numeric_cols = set(train_columns)-set(string_cols)
+'''
 for n_col in numeric_cols:
     x_train[n_col] = (x_train[n_col] - np.mean(x_train[n_col])) / (np.std(x_train[n_col]) + 1)
+'''
 
 y_train = df_train['logerror'].values
 print(x_train.shape, y_train.shape)
@@ -144,7 +148,8 @@ feature_category_cols_emb = [tf.feature_column.embedding_column(k, dimension=8) 
 feature_cols.extend(feature_category_cols_emb)
 print(len(feature_cols))
 hidden_units = [128]*32
-regressor = tf.estimator.DNNRegressor(feature_columns=feature_cols, hidden_units=hidden_units, model_dir=model_dir)
+regressor = tf.estimator.DNNRegressor(feature_columns=feature_cols, hidden_units=hidden_units,
+                                      model_dir=model_dir, activation_fn=selu.selu)
 
 LABEL = 'logerror'
 
