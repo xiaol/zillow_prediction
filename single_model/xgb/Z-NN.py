@@ -147,7 +147,7 @@ feature_cols.extend(feature_category_cols_emb)
 print(len(feature_cols))
 hidden_units = [128]*32
 regressor = tf.estimator.DNNRegressor(feature_columns=feature_cols, hidden_units=hidden_units,
-                                      model_dir=model_dir, activation_fn=selu.selu)
+                                      model_dir=model_dir, activation_fn=selu.selu, optimizer=tf.train.ProximalAdagradOptimizer(learning_rate=0.0001))
 
 LABEL = 'logerror'
 
