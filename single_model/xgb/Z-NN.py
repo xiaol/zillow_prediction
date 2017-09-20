@@ -145,9 +145,9 @@ feature_category_cols = [tf.feature_column.categorical_column_with_hash_bucket(k
 feature_category_cols_emb = [tf.feature_column.embedding_column(k, dimension=8) for k in feature_category_cols]
 feature_cols.extend(feature_category_cols_emb)
 print(len(feature_cols))
-hidden_units = [128]*32
+hidden_units = [256]*32
 regressor = tf.estimator.DNNRegressor(feature_columns=feature_cols, hidden_units=hidden_units,
-                                      model_dir=model_dir, activation_fn=selu.selu, optimizer=tf.train.ProximalAdagradOptimizer(learning_rate=0.0001))
+                                      model_dir=model_dir, activation_fn=selu.selu, optimizer=tf.train.GradientDescentOptimizer(learning_rate=0.025))
 
 LABEL = 'logerror'
 
