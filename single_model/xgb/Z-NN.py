@@ -125,6 +125,13 @@ def get_features(df):
     # Indicator whether it has Heating or not
     df['N-HeatInd'] = (df['heatingorsystemtypeid'] != 13) * 1
 
+    # There's 25 different property uses - let's compress them down to 4 categories
+    df['N-PropType'] = df.propertylandusetypeid.replace(
+        {31: "Mixed", 46: "Other", 47: "Mixed", 246: "Mixed", 247: "Mixed", 248: "Mixed", 260: "Home", 261: "Home",
+         262: "Home", 263: "Home", 264: "Home", 265: "Home", 266: "Home", 267: "Home", 268: "Home", 269: "Not Built",
+         270: "Home", 271: "Home", 273: "Home", 274: "Other", 275: "Home", 276: "Home", 279: "Home", 290: "Not Built",
+         291: "Not Built"})
+
     #----------------------------------------------
 
     # polnomials of the variable
@@ -190,6 +197,7 @@ df_train = train.merge(prop, how='left', on='parcelid')
 
 x_train = df_train
 x_train = get_features(x_train)
+string_cols.add('N-PropType')
 # x_train = prepare_data(x_train, one_hot_encode_cols)
 x_train = x_train.drop(drop_cols, axis=1)
 
