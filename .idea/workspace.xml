@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="9e94916a-0923-47c1-9f7b-14fd9e4a69d7" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/eda.ipynb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/single_model/xgb/Z-NN.py" afterPath="$PROJECT_DIR$/single_model/xgb/Z-NN.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -36,11 +35,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="Z-NN.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Z-NN.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/single_model/xgb/Z-NN.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="195">
-              <caret line="148" column="34" lean-forward="false" selection-start-line="148" selection-start-column="34" selection-end-line="148" selection-end-column="34" />
+            <state relative-caret-position="825">
+              <caret line="188" column="3" lean-forward="false" selection-start-line="188" selection-start-column="3" selection-end-line="188" selection-end-column="3" />
               <folding>
                 <element signature="e#15#24#0" expanded="true" />
               </folding>
@@ -48,10 +47,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="stacking.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="stacking.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/stacking.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="144">
+            <state relative-caret-position="774">
               <caret line="97" column="24" lean-forward="false" selection-start-line="97" selection-start-column="24" selection-end-line="97" selection-end-column="24" />
               <folding />
             </state>
@@ -168,8 +167,8 @@
         <option value="$PROJECT_DIR$/util.py" />
         <option value="$PROJECT_DIR$/single_model/xgb/selu.py" />
         <option value="$PROJECT_DIR$/single_model/xgb/Zestimate-xgboost.py" />
-        <option value="$PROJECT_DIR$/single_model/xgb/Z-NN.py" />
         <option value="$PROJECT_DIR$/eda.ipynb" />
+        <option value="$PROJECT_DIR$/single_model/xgb/Z-NN.py" />
       </list>
     </option>
   </component>
@@ -180,8 +179,7 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="27" />
-    <option name="y" value="478" />
+    <option name="y" value="549" />
     <option name="width" value="1309" />
     <option name="height" value="1968" />
   </component>
@@ -559,7 +557,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="27" y="478" width="1309" height="1968" extended-state="0" />
+    <frame x="0" y="549" width="1309" height="1968" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3297328" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -654,12 +652,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/single_model/xgb/Z-NN.py</url>
-          <line>163</line>
+          <line>253</line>
           <option name="timeStamp" value="96" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/single_model/xgb/Z-NN.py</url>
-          <line>178</line>
+          <line>268</line>
           <option name="timeStamp" value="99" />
         </line-breakpoint>
       </breakpoints>
@@ -1030,21 +1028,21 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/single_model/xgb/Z-NN.py">
+    <entry file="file://$PROJECT_DIR$/stacking.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="148" column="34" lean-forward="false" selection-start-line="148" selection-start-column="34" selection-end-line="148" selection-end-column="34" />
-          <folding>
-            <element signature="e#15#24#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="774">
+          <caret line="97" column="24" lean-forward="false" selection-start-line="97" selection-start-column="24" selection-end-line="97" selection-end-column="24" />
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/stacking.py">
+    <entry file="file://$PROJECT_DIR$/single_model/xgb/Z-NN.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="97" column="24" lean-forward="false" selection-start-line="97" selection-start-column="24" selection-end-line="97" selection-end-column="24" />
-          <folding />
+        <state relative-caret-position="825">
+          <caret line="188" column="3" lean-forward="false" selection-start-line="188" selection-start-column="3" selection-end-line="188" selection-end-column="3" />
+          <folding>
+            <element signature="e#15#24#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
