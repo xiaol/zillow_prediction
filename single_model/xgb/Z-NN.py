@@ -66,67 +66,67 @@ def get_features(df):
     # -----------------------------------------------------------------------------------------------
 
     # life of property
-    df_train['N-life'] = 2018 - df_train['yearbuilt']
+    df['N-life'] = 2018 - df['yearbuilt']
 
     # error in calculation of the finished living area of home
-    df_train['N-LivingAreaError'] = df_train['calculatedfinishedsquarefeet'] / df_train['finishedsquarefeet12']
+    df['N-LivingAreaError'] = df['calculatedfinishedsquarefeet'] / df['finishedsquarefeet12']
 
     # proportion of living area
-    df_train['N-LivingAreaProp'] = df_train['calculatedfinishedsquarefeet'] / df_train['lotsizesquarefeet']
-    df_train['N-LivingAreaProp2'] = df_train['finishedsquarefeet12'] / df_train['finishedsquarefeet15']
+    df['N-LivingAreaProp'] = df['calculatedfinishedsquarefeet'] / df['lotsizesquarefeet']
+    df['N-LivingAreaProp2'] = df['finishedsquarefeet12'] / df['finishedsquarefeet15']
 
     # Amout of extra space
-    df_train['N-ExtraSpace'] = df_train['lotsizesquarefeet'] - df_train['calculatedfinishedsquarefeet']
-    df_train['N-ExtraSpace-2'] = df_train['finishedsquarefeet15'] - df_train['finishedsquarefeet12']
+    df['N-ExtraSpace'] = df['lotsizesquarefeet'] - df['calculatedfinishedsquarefeet']
+    df['N-ExtraSpace-2'] = df['finishedsquarefeet15'] - df['finishedsquarefeet12']
 
     # Total number of rooms
-    df_train['N-TotalRooms'] = df_train['bathroomcnt'] * df_train['bedroomcnt']
+    df['N-TotalRooms'] = df['bathroomcnt'] * df['bedroomcnt']
 
     # Average room size
-    df_train['N-AvRoomSize'] = df_train['calculatedfinishedsquarefeet'] / df_train['roomcnt']
+    df['N-AvRoomSize'] = df['calculatedfinishedsquarefeet'] / df['roomcnt']
 
     # Number of Extra rooms
-    df_train['N-ExtraRooms'] = df_train['roomcnt'] - df_train['N-TotalRooms']
+    df['N-ExtraRooms'] = df['roomcnt'] - df['N-TotalRooms']
 
     # Ratio of the built structure value to land area
-    df_train['N-ValueProp'] = df_train['structuretaxvaluedollarcnt'] / df_train['landtaxvaluedollarcnt']
+    df['N-ValueProp'] = df['structuretaxvaluedollarcnt'] / df['landtaxvaluedollarcnt']
 
     # Does property have a garage, pool or hot tub and AC?
-    df_train['N-GarPoolAC'] = ((df_train['garagecarcnt'] > 0) & (df_train['pooltypeid10'] > 0) & (
-    df_train['airconditioningtypeid'] != 5)) * 1
+    df['N-GarPoolAC'] = ((df['garagecarcnt'] > 0) & (df['pooltypeid10'] > 0) & (
+    df['airconditioningtypeid'] != 5)) * 1
 
-    df_train["N-location"] = df_train["latitude"] + df_train["longitude"]
-    df_train["N-location-2"] = df_train["latitude"] * df_train["longitude"]
-    df_train["N-location-2round"] = df_train["N-location-2"].round(-4)
+    df["N-location"] = df["latitude"] + df["longitude"]
+    df["N-location-2"] = df["latitude"] * df["longitude"]
+    df["N-location-2round"] = df["N-location-2"].round(-4)
 
-    df_train["N-latitude-round"] = df_train["latitude"].round(-4)
-    df_train["N-longitude-round"] = df_train["longitude"].round(-4)
+    df["N-latitude-round"] = df["latitude"].round(-4)
+    df["N-longitude-round"] = df["longitude"].round(-4)
 
 
     # ---------------------------------
     # Ratio of tax of property over parcel
-    df_train['N-ValueRatio'] = df_train['taxvaluedollarcnt'] / df_train['taxamount']
+    df['N-ValueRatio'] = df['taxvaluedollarcnt'] / df['taxamount']
 
     # TotalTaxScore
-    df_train['N-TaxScore'] = df_train['taxvaluedollarcnt'] * df_train['taxamount']
+    df['N-TaxScore'] = df['taxvaluedollarcnt'] * df['taxamount']
 
     # polnomials of tax delinquency year
-    df_train["N-taxdelinquencyyear-2"] = df_train["taxdelinquencyyear"] ** 2
-    df_train["N-taxdelinquencyyear-3"] = df_train["taxdelinquencyyear"] ** 3
+    df["N-taxdelinquencyyear-2"] = df["taxdelinquencyyear"] ** 2
+    df["N-taxdelinquencyyear-3"] = df["taxdelinquencyyear"] ** 3
 
     # Length of time since unpaid taxes
-    df_train['N-life-tax'] = 2018 - df_train['taxdelinquencyyear']
+    df['N-life-tax'] = 2018 - df['taxdelinquencyyear']
 
     #-------------------------------------------
 
     # Indicator whether it has AC or not
-    df_train['N-ACInd'] = (df_train['airconditioningtypeid'] != 5) * 1
+    df['N-ACInd'] = (df['airconditioningtypeid'] != 5) * 1
 
     # Indicator whether it has Heating or not
-    df_train['N-HeatInd'] = (df_train['heatingorsystemtypeid'] != 13) * 1
+    df['N-HeatInd'] = (df['heatingorsystemtypeid'] != 13) * 1
 
     # There's 25 different property uses - let's compress them down to 4 categories
-    df_train['N-PropType'] = df_train.propertylandusetypeid.replace(
+    df['N-PropType'] = df.propertylandusetypeid.replace(
         {31: "Mixed", 46: "Other", 47: "Mixed", 246: "Mixed", 247: "Mixed", 248: "Mixed", 260: "Home", 261: "Home",
          262: "Home", 263: "Home", 264: "Home", 265: "Home", 266: "Home", 267: "Home", 268: "Home", 269: "Not Built",
          270: "Home", 271: "Home", 273: "Home", 274: "Other", 275: "Home", 276: "Home", 279: "Home", 290: "Not Built",
@@ -135,16 +135,16 @@ def get_features(df):
     #----------------------------------------------
 
     # polnomials of the variable
-    df_train["N-structuretaxvaluedollarcnt-2"] = df_train["structuretaxvaluedollarcnt"] ** 2
-    df_train["N-structuretaxvaluedollarcnt-3"] = df_train["structuretaxvaluedollarcnt"] ** 3
+    df["N-structuretaxvaluedollarcnt-2"] = df["structuretaxvaluedollarcnt"] ** 2
+    df["N-structuretaxvaluedollarcnt-3"] = df["structuretaxvaluedollarcnt"] ** 3
 
     # Average structuretaxvaluedollarcnt by city
-    group = df_train.groupby('regionidcity')['structuretaxvaluedollarcnt'].aggregate('mean').to_dict()
-    df_train['N-Avg-structuretaxvaluedollarcnt'] = df_train['regionidcity'].map(group)
+    group = df.groupby('regionidcity')['structuretaxvaluedollarcnt'].aggregate('mean').to_dict()
+    df['N-Avg-structuretaxvaluedollarcnt'] = df['regionidcity'].map(group)
 
     # Deviation away from average
-    df_train['N-Dev-structuretaxvaluedollarcnt'] = abs(
-        (df_train['structuretaxvaluedollarcnt'] - df_train['N-Avg-structuretaxvaluedollarcnt'])) / df_train[
+    df['N-Dev-structuretaxvaluedollarcnt'] = abs(
+        (df['structuretaxvaluedollarcnt'] - df['N-Avg-structuretaxvaluedollarcnt'])) / df[
                                                        'N-Avg-structuretaxvaluedollarcnt']
 
 
@@ -235,7 +235,8 @@ feature_category_cols = [tf.feature_column.categorical_column_with_hash_bucket(k
 feature_category_cols_emb = [tf.feature_column.embedding_column(k, dimension=8) for k in feature_category_cols]
 feature_cols.extend(feature_category_cols_emb)
 print(len(feature_cols))
-hidden_units = [256]*32
+hidden_units = [1024,512]
+hidden_units.extend([256]*32)
 regressor = tf.estimator.DNNRegressor(feature_columns=feature_cols, hidden_units=hidden_units,
                                       model_dir=model_dir)
 
