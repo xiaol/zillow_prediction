@@ -246,6 +246,7 @@ feature_cols.extend(feature_category_cols_emb)
 print(len(feature_cols))
 hidden_units = [1024,512]
 hidden_units.extend([256]*64)
+print(hidden_units)
 regressor = tf.estimator.DNNRegressor(feature_columns=feature_cols, hidden_units=hidden_units,
                                       model_dir=model_dir, activation_fn=selu.selu, optimizer=tf.train.AdagradOptimizer(learning_rate=0.005))
 
