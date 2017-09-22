@@ -214,6 +214,14 @@ for str_col in string_cols:
 train_columns = x_train.columns
 numeric_cols = set(train_columns)-set(string_cols)
 
+where_are_nan = np.isnan(x_train)
+where_are_inf = np.isinf(x_train)
+x_train[where_are_nan] = 0
+x_train[where_are_inf] = 0
+
+assert not np.any(np.isnan(x_train))
+assert not np.any(np.isinf(x_train))
+
 scaler_dict = {}
 for n_col in numeric_cols:
     scaler = preprocessing.StandardScaler()
@@ -221,13 +229,6 @@ for n_col in numeric_cols:
     x_train[n_col] = scaler.transform(x_train[n_col])
     scaler_dict[n_col] = scaler
 
-where_are_nan = np.isnan(x_train)
-# where_are_inf = np.isinf(x_train)
-x_train[where_are_nan] = 0
-# x_train[where_are_inf] = 0
-
-assert not np.any(np.isnan(x_train))
-assert not np.any(np.isinf(x_train))
 
 y_train = df_train['logerror'].values 
 print(x_train.shape, y_train.shape)
@@ -252,6 +253,7 @@ feature_cols.extend(feature_category_cols_emb)
 print(len(feature_cols))
 hidden_units = [1024,512]
 hidden_units.extend([256]*64)
+hidden_units.extend([128])
 print(hidden_units)
 regressor = tf.estimator.DNNRegressor(feature_columns=feature_cols, hidden_units=hidden_units,
                                       model_dir=model_dir, activation_fn=selu.selu, optimizer=tf.train.AdagradOptimizer(learning_rate=0.005))
@@ -268,7 +270,7 @@ def get_input_fn(data_set, label, num_epochs=None, shuffle=True):
 
 for i in range(50):
     print(str(i))
-    regressor.train(input_fn=get_input_fn(x_train, y_train), steps=100)
+    regressor.train(input_fn=get_input_fn(x_train, y_train), steps=50)
 
     ev = regressor.evaluate(
         input_fn=get_input_fn(x_valid, y_valid, num_epochs=1, shuffle=False))
@@ -284,7 +286,7 @@ for i in range(50):
     mae = MAE(y_valid, predictions)
     print("Valid MAE: {}".format(mae))
 
-raw_input("Enter something to continue ...")
+# raw_input("Enter something to continue ...")
 print('Building test set ...')
 
 print('Predicting on test ...')
@@ -323,6 +325,11 @@ for c in sub.columns[sub.columns != 'ParcelId']:
 
         for str_col in string_cols:
             x_test_fold[str_col] = le_dict[str_col].transform(x_test_fold[str_col])
+
+        where_are_nan = np.isnan(x_test_fold)
+        where_are_inf = np.isinf(x_test_fold)
+        x_test_fold[where_are_nan] = 0
+        x_test_fold[where_are_inf] = 0
 
         for n_col in numeric_cols:
             x_test_fold[n_col] = scaler_dict[n_col].transform(x_test_fold[n_col])
