@@ -260,16 +260,18 @@ def get_input_fn(data_set, label, num_epochs=None, shuffle=True):
       num_epochs=num_epochs,
       shuffle=shuffle)
 
-regressor.train(input_fn=get_input_fn(x_train, y_train), steps=5000)
+for i in range(50):
 
-ev = regressor.evaluate(
-    input_fn=get_input_fn(x_valid, y_valid, num_epochs=1, shuffle=False))
+    regressor.train(input_fn=get_input_fn(x_train, y_train), steps=100)
 
-loss_score = ev["loss"]
-print("Loss: {0:f}".format(loss_score))
+    ev = regressor.evaluate(
+        input_fn=get_input_fn(x_valid, y_valid, num_epochs=1, shuffle=False))
 
-y = regressor.predict(
-    input_fn=get_input_fn(x_valid, [0]*x_valid.shape[0], num_epochs=1, shuffle=False))
+    loss_score = ev["loss"]
+    print("Loss: {0:f}".format(loss_score))
+
+    y = regressor.predict(
+        input_fn=get_input_fn(x_valid, [0]*x_valid.shape[0], num_epochs=1, shuffle=False))
 # .predict() returns an iterator of dicts; convert to a list and print
 # predictions
 predictions = list(p["predictions"][0] for p in itertools.islice(y, x_valid.shape[0]))
