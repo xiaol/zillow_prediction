@@ -157,7 +157,7 @@ def chunks(l, n):
 print('Loading data ...')
 
 train = pd.read_csv('../../data/train_2016_v2.csv')
-prop = pd.read_csv('../../data/properties_2016.csv').fillna(-1)  # , nrows=500)
+prop = pd.read_csv('../../data/properties_2016.csv').fillna(-0.0001)  # , nrows=500)
 sample = pd.read_csv('../../data/sample_submission.csv')
 
 string_cols = []
@@ -190,7 +190,7 @@ prop['N-PropType'] = prop.propertylandusetypeid.replace(
          270: "Home", 271: "Home", 273: "Home", 274: "Other", 275: "Home", 276: "Home", 279: "Home", 290: "Not Built",
          291: "Not Built"})
 
-brc = Birch(branching_factor=30, n_clusters=None, threshold=0.02, compute_labels=True)
+brc = Birch(branching_factor=5, n_clusters=None, threshold=0.02, compute_labels=True)
 prop['loc_label'] = brc.fit_predict(prop[['latitude', 'longitude']])
 print('Number of loc label: {}'.format(len(set(prop['loc_label']))))
 
@@ -214,9 +214,16 @@ for str_col in string_cols:
 train_columns = x_train.columns
 numeric_cols = set(train_columns)-set(string_cols)
 for n_col in numeric_cols:
-    x_train[n_col] = (x_train[n_col] - np.mean(x_train[n_col])) / (np.std(x_train[n_col]) + 1)
+    x_train[n_col] = (x_train[n_col] - np.mean(x_train[n_col])) / (np.std(x_train[n_col])+1)
+where_are_nan = np.isnan(x_train)
+# where_are_inf = np.isinf(x_train)
+x_train[where_are_nan] = 0
+# x_train[where_are_inf] = 0
 
-y_train = df_train['logerror'].values
+assert not np.any(np.isnan(x_train))
+assert not np.any(np.isinf(x_train))
+
+y_train = df_train['logerror'].values 
 print(x_train.shape, y_train.shape)
 print x_train.columns
 pd.Series(list(x_train.columns)).to_csv('../../data/columns.csv')
@@ -238,9 +245,9 @@ feature_category_cols_emb = [tf.feature_column.embedding_column(k, dimension=8) 
 feature_cols.extend(feature_category_cols_emb)
 print(len(feature_cols))
 hidden_units = [1024,512]
-hidden_units.extend([256]*32)
+hidden_units.extend([256]*64)
 regressor = tf.estimator.DNNRegressor(feature_columns=feature_cols, hidden_units=hidden_units,
-                                      model_dir=model_dir)
+                                      model_dir=model_dir, activation_fn=selu.selu, optimizer=tf.train.AdagradOptimizer(learning_rate=0.005))
 
 LABEL = 'logerror'
 
