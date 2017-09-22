@@ -216,7 +216,7 @@ numeric_cols = set(train_columns)-set(string_cols)
 
 scaler_dict = {}
 for n_col in numeric_cols:
-    scaler = preprocessing.StandardScaler
+    scaler = preprocessing.StandardScaler()
     scaler.fit(x_train[n_col])
     x_train[n_col] = scaler.transform(x_train[n_col])
     scaler_dict[n_col] = scaler
