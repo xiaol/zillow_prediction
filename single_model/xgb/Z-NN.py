@@ -213,8 +213,14 @@ for str_col in string_cols:
 
 train_columns = x_train.columns
 numeric_cols = set(train_columns)-set(string_cols)
+
+scaler_dict = {}
 for n_col in numeric_cols:
-    x_train[n_col] = (x_train[n_col] - np.mean(x_train[n_col])) / (np.std(x_train[n_col])+1)
+    scaler = preprocessing.StandardScaler
+    scaler.fit(x_train[n_col])
+    x_train[n_col] = scaler.transform(x_train[n_col])
+    scaler_dict[n_col] = scaler
+
 where_are_nan = np.isnan(x_train)
 # where_are_inf = np.isinf(x_train)
 x_train[where_are_nan] = 0
@@ -261,7 +267,7 @@ def get_input_fn(data_set, label, num_epochs=None, shuffle=True):
       shuffle=shuffle)
 
 for i in range(50):
-
+    print(str(i))
     regressor.train(input_fn=get_input_fn(x_train, y_train), steps=100)
 
     ev = regressor.evaluate(
@@ -272,13 +278,13 @@ for i in range(50):
 
     y = regressor.predict(
         input_fn=get_input_fn(x_valid, [0]*x_valid.shape[0], num_epochs=1, shuffle=False))
-# .predict() returns an iterator of dicts; convert to a list and print
-# predictions
-predictions = list(p["predictions"][0] for p in itertools.islice(y, x_valid.shape[0]))
-mae = MAE(y_valid, predictions)
-print("Valid MAE: {}".format(mae))
+    # .predict() returns an iterator of dicts; convert to a list and print
+    # predictions
+    predictions = list(p["predictions"][0] for p in itertools.islice(y, x_valid.shape[0]))
+    mae = MAE(y_valid, predictions)
+    print("Valid MAE: {}".format(mae))
 
-# raw_input("Enter something to continue ...")
+raw_input("Enter something to continue ...")
 print('Building test set ...')
 
 print('Predicting on test ...')
@@ -319,7 +325,7 @@ for c in sub.columns[sub.columns != 'ParcelId']:
             x_test_fold[str_col] = le_dict[str_col].transform(x_test_fold[str_col])
 
         for n_col in numeric_cols:
-            x_test_fold[n_col] = (x_test_fold[n_col] - np.mean(x_test_fold[n_col])) / (np.std(x_test_fold[n_col]) + 1)
+            x_test_fold[n_col] = scaler_dict[n_col].transform(x_test_fold[n_col])
 
         # predict p_test_cks with x_test_fold
         p_test_iter = regressor.predict(input_fn=get_input_fn(x_test_fold, [0]*x_test_fold.shape[0], num_epochs=1, shuffle=False))
