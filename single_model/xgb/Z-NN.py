@@ -16,7 +16,12 @@ import itertools
 
 from sklearn import preprocessing
 
+from sklearn.cluster import MiniBatchKMeans
+
 import selu
+
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 drop_cols = ['logerror','parcelid']
 one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid', 'fips']
@@ -42,26 +47,38 @@ def get_features(df):
     df['transaction_day'] = df['transactiondate'].dt.weekday.astype(np.int8)
 
     df = df.drop('transactiondate', axis=1)
-    # df['tax_rt'] = df['taxamount'] / df['taxvaluedollarcnt']
+    df['tax_rt'] = df['taxamount'] / df['taxvaluedollarcnt']
     df['extra_bathroom_cnt'] = df['bathroomcnt'] - df['bedroomcnt']
     df['room_sqt'] = df['calculatedfinishedsquarefeet']/(df['roomcnt'] + 1)
-    # df['structure_tax_rt'] = df['structuretaxvaluedollarcnt'] / df['taxvaluedollarcnt']
-    '''
+    df['structure_tax_rt'] = df['structuretaxvaluedollarcnt'] / df['taxvaluedollarcnt']
     df['land_tax_rt'] = df['landtaxvaluedollarcnt'] / df['taxvaluedollarcnt']
-    '''
 
     # 商圈内待售房屋数量
     df = merge_nunique(df, ['loc_label'], 'parcelid', 'loc_building_num')
     df = merge_nunique(df, ['regionidzip'], 'parcelid', 'region_property_num')
     df = merge_nunique(df, ['regionidcity'], 'parcelid', 'city_property_num')
-    # df = merge_nunique(df, ['regionidcounty'], 'parcelid', 'county_property_num')
+    df = merge_nunique(df, ['regionidcounty'], 'parcelid', 'county_property_num')
 
-    # df = merge_count(df, ['transaction_month','regionidcity'], 'parcelid', 'city_month_transaction_count')
+    df = merge_count(df, ['transaction_month','regionidcity'], 'parcelid', 'city_month_transaction_count')
     # 商圈房屋状况均值
-    # df = merge_median(df, ['regionidcity'], 'buildingqualitytypeid', 'city_quality_median')
+    df = merge_median(df, ['regionidcity'], 'buildingqualitytypeid', 'city_quality_median')
     for col in ['finishedsquarefeet12', 'garagetotalsqft', 'yearbuilt', 'calculatedfinishedsquarefeet', 'lotsizesquarefeet',
                 'unitcnt', 'poolcnt']:
         df = merge_mean(df, ['loc_label'], col, 'loc_'+col+'_mean')
+        df = merge_mean(df, ['regionidzip'], col, 'region_'+col+'_mean')
+        df = merge_mean(df, ['regionidcity'], col, 'city_'+col+'_mean')
+        df = merge_mean(df, ['regionidcounty'], col, 'county_'+col+'_mean')
+
+        df = merge_median(df, ['loc_label'], col, 'loc_'+col+'_median')
+        df = merge_median(df, ['regionidzip'], col, 'region_'+col+'_median')
+        df = merge_median(df, ['regionidcity'], col, 'city_'+col+'_median')
+        df = merge_median(df, ['regionidcounty'], col, 'county_'+col+'_median')
+
+        df = merge_std(df, ['loc_label'], col, 'loc_'+col+'_std')
+        df = merge_std(df, ['regionidzip'], col, 'region_'+col+'_std')
+        df = merge_std(df, ['regionidcity'], col, 'city_'+col+'_std')
+        df = merge_std(df, ['regionidcounty'], col, 'county_'+col+'_std')
+
 
     # -----------------------------------------------------------------------------------------------
 
@@ -157,7 +174,7 @@ def chunks(l, n):
 print('Loading data ...')
 
 train = pd.read_csv('../../data/train_2016_v2.csv')
-prop = pd.read_csv('../../data/properties_2016.csv').fillna(-0.0001)  # , nrows=500)
+prop = pd.read_csv('../../data/properties_2016.csv').fillna(0)  # , nrows=500)
 sample = pd.read_csv('../../data/sample_submission.csv')
 
 string_cols = []
@@ -190,8 +207,11 @@ prop['N-PropType'] = prop.propertylandusetypeid.replace(
          270: "Home", 271: "Home", 273: "Home", 274: "Other", 275: "Home", 276: "Home", 279: "Home", 290: "Not Built",
          291: "Not Built"})
 
-brc = Birch(branching_factor=5, n_clusters=None, threshold=0.02, compute_labels=True)
-prop['loc_label'] = brc.fit_predict(prop[['latitude', 'longitude']])
+# brc = Birch(branching_factor=5, n_clusters=None, threshold=0.02, compute_labels=True)
+# prop['loc_label'] = brc.fit_predict(prop[['latitude', 'longitude']])
+
+kmeans = MiniBatchKMeans(n_clusters=4000, batch_size=2000).fit(prop[['latitude', 'longitude']])
+prop.loc[:, 'loc_label'] = kmeans.labels_
 print('Number of loc label: {}'.format(len(set(prop['loc_label']))))
 
 df_train = train.merge(prop, how='left', on='parcelid')
@@ -224,9 +244,9 @@ assert not np.any(np.isinf(x_train))
 
 scaler_dict = {}
 for n_col in numeric_cols:
-    scaler = preprocessing.StandardScaler()
-    scaler.fit(x_train[n_col])
-    x_train[n_col] = scaler.transform(x_train[n_col])
+    scaler = preprocessing.MinMaxScaler(feature_range=(-100, 100))
+    scaler.fit(x_train[n_col].values.reshape(-1,1))
+    x_train[n_col] = scaler.transform(x_train[n_col].values.reshape(-1,1))
     scaler_dict[n_col] = scaler
 
 
@@ -251,9 +271,9 @@ feature_category_cols = [tf.feature_column.categorical_column_with_hash_bucket(k
 feature_category_cols_emb = [tf.feature_column.embedding_column(k, dimension=8) for k in feature_category_cols]
 feature_cols.extend(feature_category_cols_emb)
 print(len(feature_cols))
-hidden_units = [1024,512]
-hidden_units.extend([256]*64)
-hidden_units.extend([128])
+hidden_units = [300]
+hidden_units.extend([300]*510)
+hidden_units.extend([300])
 print(hidden_units)
 regressor = tf.estimator.DNNRegressor(feature_columns=feature_cols, hidden_units=hidden_units,
                                       model_dir=model_dir, activation_fn=selu.selu, optimizer=tf.train.AdagradOptimizer(learning_rate=0.005))
@@ -268,15 +288,17 @@ def get_input_fn(data_set, label, num_epochs=None, shuffle=True):
       num_epochs=num_epochs,
       shuffle=shuffle)
 
+regressor.train(input_fn=get_input_fn(x_train, y_train), steps=90)
+
 for i in range(50):
     print(str(i))
-    regressor.train(input_fn=get_input_fn(x_train, y_train), steps=50)
-
+    '''
     ev = regressor.evaluate(
         input_fn=get_input_fn(x_valid, y_valid, num_epochs=1, shuffle=False))
 
     loss_score = ev["loss"]
     print("Loss: {0:f}".format(loss_score))
+    '''
 
     y = regressor.predict(
         input_fn=get_input_fn(x_valid, [0]*x_valid.shape[0], num_epochs=1, shuffle=False))
@@ -286,7 +308,9 @@ for i in range(50):
     mae = MAE(y_valid, predictions)
     print("Valid MAE: {}".format(mae))
 
-# raw_input("Enter something to continue ...")
+    regressor.train(input_fn=get_input_fn(x_train, y_train), steps=10)
+
+raw_input("Enter something to continue ...")
 print('Building test set ...')
 
 print('Predicting on test ...')

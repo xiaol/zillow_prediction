@@ -13,6 +13,8 @@ import matplotlib
 matplotlib.use('pdf')
 import matplotlib.pyplot as plt
 
+from sklearn.cluster import MiniBatchKMeans
+
 drop_cols = ['parcelid', 'logerror']
 one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid', 'fips']
 
@@ -81,8 +83,11 @@ train = train[train.logerror < 0.419]
 prop['latitude'] = prop['latitude']*1e-6
 prop['longitude'] = prop['longitude']*1e-6
 
-brc = Birch(branching_factor=50, n_clusters=None, threshold=0.03, compute_labels=True)
-prop['loc_label'] = brc.fit_predict(prop[['latitude', 'longitude']])
+# brc = Birch(branching_factor=50, n_clusters=None, threshold=0.03, compute_labels=True)
+# prop['loc_label'] = brc.fit_predict(prop[['latitude', 'longitude']])
+
+kmeans = MiniBatchKMeans(n_clusters=1200, batch_size=1000).fit(prop[['latitude', 'longitude']])
+prop.loc[:, 'loc_label'] = kmeans.labels_
 print('Number of loc label: {}'.format(len(set(prop['loc_label']))))
 # TODO loc label
 df_train = train.merge(prop, how='left', on='parcelid')
@@ -132,7 +137,7 @@ res = xgb.cv(params, d_train, num_boost_round=2000, nfold=2,
 num_best_rounds = len(res)
 print("Number of best rounds: {}".format(num_best_rounds))
 '''
-num_best_rounds = 520
+num_best_rounds = 520  # [510]	train-mae:0.051073
 clf = xgb.train(params, d_train, num_best_rounds, watchlist, verbose_eval=10)  # watchlist,  early_stopping_rounds=100, verbose_eval=10)
 
 fig, ax = plt.subplots(figsize=(20,40))
