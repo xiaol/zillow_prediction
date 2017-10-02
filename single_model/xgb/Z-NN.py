@@ -25,7 +25,7 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 drop_cols = ['logerror'] # ,'parcelid']
-one_hot_encode_cols = ['parcelid', 'airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid', 'fips']
+one_hot_encode_cols = ['rawcensustractandblock','censustractandblock','regionidneighborhood', 'parcelid', 'airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid', 'fips', 'pooltypeid10','pooltypeid2', 'pooltypeid7','decktypeid']
 
 
 def MAE(yhat, y):
@@ -43,11 +43,14 @@ def mae(y, y_pred):
 
 def get_features(df):
     df['transactiondate'] = pd.to_datetime(df['transactiondate'])
+    hard_date = datetime(2016,1,1)
 
     df['transaction_month'] = df['transactiondate'].dt.month.astype(np.int8)
     df['transaction_day'] = df['transactiondate'].dt.weekday.astype(np.int8)
     df['transaction_month_day'] = df['transactiondate'].dt.day.astype(np.int8)
     df['transaction_quarter'] = df['transactiondate'].dt.quarter.astype(np.int8)
+    df['transaction_date'] = df['transactiondate'] - hard_date
+    df['transaction_date'] = df['transaction_date'].dt.days
 
     df = df.drop('transactiondate', axis=1)
     df['tax_rt'] = df['taxamount'] / df['taxvaluedollarcnt']
@@ -63,16 +66,21 @@ def get_features(df):
     df = merge_nunique(df, ['regionidcounty'], 'parcelid', 'county_property_num')
     df = merge_nunique(df, ['lati', 'long'], 'parcelid', 'county_property_num')
 
-    for col_time in [('transaction_month','month')]:
+    for col_time in [('transaction_month','month'), ('transaction_month_day','month_day'), ('transaction_day', 'day'), ('yearbuilt','year_built'),
+                     ('assessmentyear', 'assessmentyear'), ('buildingqualitytypeid','buildingqualitytypeid'), ('heatingorsystemtypeid', 'heatingorsystemtypeid'),('storytypeid', 'storytypeid'),
+                     ('propertylandusetypeid','propertylandusetypeid'), ('pooltypeid10','pooltypeid10'), ('pooltypeid2','pooltypeid2'), ('pooltypeid7','pooltypeid7'),
+                     ('architecturalstyletypeid', 'architecturalstyletypeid'), ('buildingclasstypeid','buildingclasstypeid'),
+                     ('propertylandusetypeid','propertylandusetypeid'),('propertycountylandusecode', 'propertycountylandusecode') ,('propertyzoningdesc', 'propertyzoningdesc'),
+                     ('typeconstructiontypeid', 'typeconstructiontypeid')]:
         df = merge_count(df, [col_time[0],'regionidcity'], 'parcelid', col_time[1]+'_city_transaction_count')
         df = merge_count(df, [col_time[0],'regionidzip'], 'parcelid', col_time[1]+'_region_transaction_count')
         df = merge_count(df, [col_time[0],'regionidcounty'], 'parcelid', col_time[1]+'_county_transaction_count')
         df = merge_count(df, [col_time[0],'loc_label'], 'parcelid', col_time[1]+'_loc_transaction_count')
         df = merge_count(df, [col_time[0],'lati', 'long'], 'parcelid', col_time[1]+'_lati_long_transaction_count')
     # 商圈房屋状况均值
-    df = merge_median(df, ['regionidcity'], 'buildingqualitytypeid', 'city_quality_median')
     for col in ['finishedsquarefeet12', 'garagetotalsqft', 'yearbuilt', 'calculatedfinishedsquarefeet', 'lotsizesquarefeet',
-                'unitcnt', 'poolcnt', 'taxamount', 'taxvaluedollarcnt', 'landtaxvaluedollarcnt']:
+                'unitcnt', 'poolcnt', 'taxamount', 'taxvaluedollarcnt', 'landtaxvaluedollarcnt', 'buildingqualitytypeid','bathroomcnt','roomcnt',
+                'fullbathcnt','calculatedbathnbr']:
         df = merge_mean(df, ['loc_label'], col, 'loc_'+col+'_mean')
         df = merge_mean(df, ['regionidzip'], col, 'region_'+col+'_mean')
         df = merge_mean(df, ['regionidcity'], col, 'city_'+col+'_mean')
@@ -176,8 +184,7 @@ def get_features(df):
 
     # Deviation away from average
     df['N-Dev-structuretaxvaluedollarcnt'] = abs(
-        (df['structuretaxvaluedollarcnt'] - df['N-Avg-structuretaxvaluedollarcnt'])) / df[
-                                                       'N-Avg-structuretaxvaluedollarcnt']
+        (df['structuretaxvaluedollarcnt'] - df['N-Avg-structuretaxvaluedollarcnt'])) / df['N-Avg-structuretaxvaluedollarcnt']
 
 
     # ----------------------------------------------------
@@ -269,7 +276,7 @@ assert not np.any(np.isinf(x_train))
 
 scaler_dict = {}
 for n_col in numeric_cols:
-    scaler = preprocessing.MinMaxScaler(feature_range=(-100, 100))
+    scaler = preprocessing.MinMaxScaler(feature_range=(-1, 1))
     scaler.fit(x_train[n_col].values.reshape(-1,1))
     x_train[n_col] = scaler.transform(x_train[n_col].values.reshape(-1,1))
     scaler_dict[n_col] = scaler
@@ -289,7 +296,7 @@ pd.Series(list(x_train.columns)).to_csv('../../data/columns.csv')
 del df_train; gc.collect()
 
 
-x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, stratify=x_train['transaction_month'].values, train_size=0.9, random_state=1)
+x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, stratify=x_train['transaction_month'].values, train_size=0.8, random_state=1)
 # x_train, y_train, x_valid, y_valid = x_train[:split], y_train[:split], x_train[split:], y_train[split:]
 
 print('Training ...')
@@ -303,7 +310,7 @@ feature_category_cols_emb = [tf.feature_column.embedding_column(k, dimension=8) 
 feature_cols.extend(feature_category_cols_emb)
 print(len(feature_cols))
 hidden_units = []
-hidden_units.extend([608,304]*128)
+hidden_units.extend([256,256, 128, 64])
 hidden_units.extend([])
 print(hidden_units)
 regressor = tf.estimator.DNNRegressor(feature_columns=feature_cols, hidden_units=hidden_units,
@@ -319,9 +326,10 @@ def get_input_fn(data_set, label, num_epochs=None, shuffle=True):
       num_epochs=num_epochs,
       shuffle=shuffle)
 
-regressor.train(input_fn=get_input_fn(x_train, y_train), steps=200)
+print(x_train.head())
+regressor.train(input_fn=get_input_fn(x_train, y_train), steps=50)
 
-for i in range(50):
+for i in range(100):
     print(str(i))
     '''
     ev = regressor.evaluate(
@@ -342,10 +350,15 @@ for i in range(50):
     predictions = y_scaler.transform(nd_pre.reshape(-1,1))
     '''
 
+
+
     mae = MAE(y_valid, predictions)
     print("Valid MAE: {}".format(mae))
+    if mae < 0.0529:
+        print(predictions)
+        # break
 
-    regressor.train(input_fn=get_input_fn(x_train, y_train), steps=100)
+    regressor.train(input_fn=get_input_fn(x_train, y_train), steps=50)
 
 raw_input("Enter something to continue ...")
 print('Building test set ...')
@@ -393,7 +406,7 @@ for c in sub.columns[sub.columns != 'ParcelId']:
         x_test_fold[where_are_inf] = 0
 
         for n_col in numeric_cols:
-            x_test_fold[n_col] = scaler_dict[n_col].transform(x_test_fold[n_col])
+            x_test_fold[n_col] = scaler_dict[n_col].transform(x_test_fold[n_col].values.reshape(-1,1))
 
         # predict p_test_cks with x_test_fold
         p_test_iter = regressor.predict(input_fn=get_input_fn(x_test_fold, [0]*x_test_fold.shape[0], num_epochs=1, shuffle=False))

@@ -16,7 +16,8 @@ import matplotlib.pyplot as plt
 from sklearn.cluster import MiniBatchKMeans
 
 drop_cols = ['parcelid', 'logerror']
-one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid', 'fips']
+#one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid', 'fips']
+one_hot_encode_cols = ['rawcensustractandblock','censustractandblock','regionidneighborhood', 'parcelid', 'airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid', 'fips', 'pooltypeid10','pooltypeid2', 'pooltypeid7','decktypeid']
 
 
 def prepare_data(df, columns):
@@ -27,8 +28,15 @@ def prepare_data(df, columns):
 def get_features(df):
     df['transactiondate'] = pd.to_datetime(df['transactiondate'])
 
+    hard_date = datetime(2016,1,1)
+
     df['transaction_month'] = df['transactiondate'].dt.month.astype(np.int8)
     df['transaction_day'] = df['transactiondate'].dt.weekday.astype(np.int8)
+    df['transaction_month_day'] = df['transactiondate'].dt.day.astype(np.int8)
+    df['transaction_quarter'] = df['transactiondate'].dt.quarter.astype(np.int8)
+    df['transaction_date'] = df['transactiondate'] - hard_date
+    df['transaction_date'] = df['transaction_date'].dt.days
+
 
     df = df.drop('transactiondate', axis=1)
     # df['tax_rt'] = df['taxamount'] / df['taxvaluedollarcnt']
@@ -47,10 +55,13 @@ def get_features(df):
 
     # df = merge_count(df, ['transaction_month','regionidcity'], 'parcelid', 'city_month_transaction_count')
     # 商圈房屋状况均值
+
     # df = merge_median(df, ['regionidcity'], 'buildingqualitytypeid', 'city_quality_median')
+    '''
     for col in ['finishedsquarefeet12', 'garagetotalsqft', 'yearbuilt', 'calculatedfinishedsquarefeet', 'lotsizesquarefeet',
                 'unitcnt', 'poolcnt']:
         df = merge_mean(df, ['loc_label'], col, 'loc_'+col+'_mean')
+    '''
     return df
 
 
@@ -80,8 +91,8 @@ print(split)
 train = train[train.logerror > -0.4]
 train = train[train.logerror < 0.419]
 
-prop['latitude'] = prop['latitude']*1e-6
-prop['longitude'] = prop['longitude']*1e-6
+# prop['latitude'] = prop['latitude']*1e-6
+# prop['longitude'] = prop['longitude']*1e-6
 
 # brc = Birch(branching_factor=50, n_clusters=None, threshold=0.03, compute_labels=True)
 # prop['loc_label'] = brc.fit_predict(prop[['latitude', 'longitude']])
@@ -89,6 +100,13 @@ prop['longitude'] = prop['longitude']*1e-6
 kmeans = MiniBatchKMeans(n_clusters=1200, batch_size=1000).fit(prop[['latitude', 'longitude']])
 prop.loc[:, 'loc_label'] = kmeans.labels_
 print('Number of loc label: {}'.format(len(set(prop['loc_label']))))
+prop[['parcelid','loc_label', 'longitude','latitude']].to_csv('../../data/loc_label.csv')
+
+prop['lati'] = prop['latitude']/10000
+prop['long'] = prop['longitude']/10000
+prop['lati'] = prop['lati'].apply(np.round)
+prop['long'] = prop['long'].apply(np.round)
+
 # TODO loc label
 df_train = train.merge(prop, how='left', on='parcelid')
 
