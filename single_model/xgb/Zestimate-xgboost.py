@@ -8,16 +8,13 @@ import xgboost as xgb
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from util import *
-from sklearn.cluster import DBSCAN, Birch
+from sklearn.cluster import DBSCAN
 import matplotlib
 matplotlib.use('pdf')
 import matplotlib.pyplot as plt
 
-from sklearn.cluster import MiniBatchKMeans
-
 drop_cols = ['parcelid', 'logerror']
-# one_hot_encode_cols = ['rawcensustractandblock','censustractandblock','regionidneighborhood', 'airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid', 'fips']
-one_hot_encode_cols = ['rawcensustractandblock','censustractandblock','regionidneighborhood', 'airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid', 'fips', 'pooltypeid10','pooltypeid2', 'pooltypeid7','decktypeid']
+one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid', 'fips']
 
 
 def prepare_data(df, columns):
@@ -27,7 +24,6 @@ def prepare_data(df, columns):
 
 def get_features(df):
     df['transactiondate'] = pd.to_datetime(df['transactiondate'])
-
     hard_date = datetime(2016,1,1)
 
     df['transaction_month'] = df['transactiondate'].dt.month.astype(np.int8)
@@ -37,31 +33,144 @@ def get_features(df):
     df['transaction_date'] = df['transactiondate'] - hard_date
     df['transaction_date'] = df['transaction_date'].dt.days
 
-
     df = df.drop('transactiondate', axis=1)
-    # df['tax_rt'] = df['taxamount'] / df['taxvaluedollarcnt']
+    df['tax_rt'] = df['taxamount'] / df['taxvaluedollarcnt']
     df['extra_bathroom_cnt'] = df['bathroomcnt'] - df['bedroomcnt']
     df['room_sqt'] = df['calculatedfinishedsquarefeet']/(df['roomcnt'] + 1)
-    # df['structure_tax_rt'] = df['structuretaxvaluedollarcnt'] / df['taxvaluedollarcnt']
-    '''
+    df['structure_tax_rt'] = df['structuretaxvaluedollarcnt'] / df['taxvaluedollarcnt']
     df['land_tax_rt'] = df['landtaxvaluedollarcnt'] / df['taxvaluedollarcnt']
-    '''
 
     # 商圈内待售房屋数量
     df = merge_nunique(df, ['loc_label'], 'parcelid', 'loc_building_num')
     df = merge_nunique(df, ['regionidzip'], 'parcelid', 'region_property_num')
     df = merge_nunique(df, ['regionidcity'], 'parcelid', 'city_property_num')
-    # df = merge_nunique(df, ['regionidcounty'], 'parcelid', 'county_property_num')
+    df = merge_nunique(df, ['regionidcounty'], 'parcelid', 'county_property_num')
+    df = merge_nunique(df, ['lati', 'long'], 'parcelid', 'county_property_num')
 
-    # df = merge_count(df, ['transaction_month','regionidcity'], 'parcelid', 'city_month_transaction_count')
+    for col_time in [('transaction_month','month'), ('transaction_month_day','month_day'), ('transaction_day', 'day'), ('yearbuilt','year_built'),
+                     ('assessmentyear', 'assessmentyear'), ('buildingqualitytypeid','buildingqualitytypeid'), ('heatingorsystemtypeid', 'heatingorsystemtypeid'),('storytypeid', 'storytypeid'),
+                     ('propertylandusetypeid','propertylandusetypeid'), ('pooltypeid10','pooltypeid10'), ('pooltypeid2','pooltypeid2'), ('pooltypeid7','pooltypeid7'),
+                     ('architecturalstyletypeid', 'architecturalstyletypeid'), ('buildingclasstypeid','buildingclasstypeid'),
+                     ('propertylandusetypeid','propertylandusetypeid'),('propertycountylandusecode', 'propertycountylandusecode') ,('propertyzoningdesc', 'propertyzoningdesc'),
+                     ('typeconstructiontypeid', 'typeconstructiontypeid')]:
+        df = merge_count(df, [col_time[0],'regionidcity'], 'parcelid', col_time[1]+'_city_transaction_count')
+        df = merge_count(df, [col_time[0],'regionidzip'], 'parcelid', col_time[1]+'_region_transaction_count')
+        df = merge_count(df, [col_time[0],'regionidcounty'], 'parcelid', col_time[1]+'_county_transaction_count')
+        df = merge_count(df, [col_time[0],'loc_label'], 'parcelid', col_time[1]+'_loc_transaction_count')
+        df = merge_count(df, [col_time[0],'lati', 'long'], 'parcelid', col_time[1]+'_lati_long_transaction_count')
     # 商圈房屋状况均值
-
-    # df = merge_median(df, ['regionidcity'], 'buildingqualitytypeid', 'city_quality_median')
-    '''
     for col in ['finishedsquarefeet12', 'garagetotalsqft', 'yearbuilt', 'calculatedfinishedsquarefeet', 'lotsizesquarefeet',
-                'unitcnt', 'poolcnt']:
+                'unitcnt', 'poolcnt', 'taxamount', 'taxvaluedollarcnt', 'landtaxvaluedollarcnt', 'buildingqualitytypeid','bathroomcnt','roomcnt',
+                'fullbathcnt','calculatedbathnbr']:
         df = merge_mean(df, ['loc_label'], col, 'loc_'+col+'_mean')
-    '''
+        df = merge_mean(df, ['regionidzip'], col, 'region_'+col+'_mean')
+        df = merge_mean(df, ['regionidcity'], col, 'city_'+col+'_mean')
+        df = merge_mean(df, ['regionidcounty'], col, 'county_'+col+'_mean')
+        df = merge_mean(df, ['lati', 'long'], col, 'county_'+col+'_mean')
+
+
+        df = merge_median(df, ['loc_label'], col, 'loc_'+col+'_median')
+        df = merge_median(df, ['regionidzip'], col, 'region_'+col+'_median')
+        df = merge_median(df, ['regionidcity'], col, 'city_'+col+'_median')
+        df = merge_median(df, ['regionidcounty'], col, 'county_'+col+'_median')
+        df = merge_median(df, ['lati', 'long'], col, 'county_'+col+'_median')
+
+        df = merge_std(df, ['loc_label'], col, 'loc_'+col+'_std')
+        df = merge_std(df, ['regionidzip'], col, 'region_'+col+'_std')
+        df = merge_std(df, ['regionidcity'], col, 'city_'+col+'_std')
+        df = merge_std(df, ['regionidcounty'], col, 'county_'+col+'_std')
+        df = merge_std(df, ['lati', 'long'], col, 'county_'+col+'_std')
+
+    for col in ['finishedsquarefeet12', 'garagetotalsqft', 'calculatedfinishedsquarefeet', 'lotsizesquarefeet',
+                'unitcnt', 'poolcnt', 'taxamount', 'taxvaluedollarcnt', 'landtaxvaluedollarcnt']:
+
+        df = merge_sum(df, ['loc_label'], col, 'loc_'+col+'_sum')
+        df = merge_sum(df, ['regionidzip'], col, 'region_'+col+'_sum')
+        df = merge_sum(df, ['regionidcity'], col, 'city_'+col+'_sum')
+        df = merge_sum(df, ['regionidcounty'], col, 'county_'+col+'_sum')
+        df = merge_sum(df, ['lati', 'long'], col, 'county_'+col+'_sum')
+    # -----------------------------------------------------------------------------------------------
+
+    # life of property
+    df['N-life'] = 2018 - df['yearbuilt']
+
+    # error in calculation of the finished living area of home
+    df['N-LivingAreaError'] = df['calculatedfinishedsquarefeet'] / df['finishedsquarefeet12']
+
+    # proportion of living area
+    df['N-LivingAreaProp'] = df['calculatedfinishedsquarefeet'] / df['lotsizesquarefeet']
+    df['N-LivingAreaProp2'] = df['finishedsquarefeet12'] / df['finishedsquarefeet15']
+
+    # Amout of extra space
+    df['N-ExtraSpace'] = df['lotsizesquarefeet'] - df['calculatedfinishedsquarefeet']
+    df['N-ExtraSpace-2'] = df['finishedsquarefeet15'] - df['finishedsquarefeet12']
+
+    # Total number of rooms
+    df['N-TotalRooms'] = df['bathroomcnt'] * df['bedroomcnt']
+
+    # Average room size
+    df['N-AvRoomSize'] = df['calculatedfinishedsquarefeet'] / df['roomcnt']
+
+    # Number of Extra rooms
+    df['N-ExtraRooms'] = df['roomcnt'] - df['N-TotalRooms']
+
+    # Ratio of the built structure value to land area
+    df['N-ValueProp'] = df['structuretaxvaluedollarcnt'] / df['landtaxvaluedollarcnt']
+
+    # Does property have a garage, pool or hot tub and AC?
+    df['N-GarPoolAC'] = ((df['garagecarcnt'] > 0) & (df['pooltypeid10'] > 0) & (
+    df['airconditioningtypeid'] != 5)) * 1
+
+    df["N-location"] = df["latitude"] + df["longitude"]
+    df["N-location-2"] = df["latitude"] * df["longitude"]
+    df["N-location-2round"] = df["N-location-2"].round(-4)
+
+    df["N-latitude-round"] = df["latitude"].round(-4)
+    df["N-longitude-round"] = df["longitude"].round(-4)
+
+
+    # ---------------------------------
+    # Ratio of tax of property over parcel
+    df['N-ValueRatio'] = df['taxvaluedollarcnt'] / df['taxamount']
+
+    # TotalTaxScore
+    df['N-TaxScore'] = df['taxvaluedollarcnt'] * df['taxamount']
+
+    # polnomials of tax delinquency year
+    df["N-taxdelinquencyyear-2"] = df["taxdelinquencyyear"] ** 2
+    df["N-taxdelinquencyyear-3"] = df["taxdelinquencyyear"] ** 3
+
+    # Length of time since unpaid taxes
+    df['N-life-tax'] = 2018 - df['taxdelinquencyyear']
+
+    #-------------------------------------------
+
+    # Indicator whether it has AC or not
+    df['N-ACInd'] = (df['airconditioningtypeid'] != 5) * 1
+
+    # Indicator whether it has Heating or not
+    df['N-HeatInd'] = (df['heatingorsystemtypeid'] != 13) * 1
+
+
+
+    #----------------------------------------------
+
+    # polnomials of the variable
+    df["N-structuretaxvaluedollarcnt-2"] = df["structuretaxvaluedollarcnt"] ** 2
+    df["N-structuretaxvaluedollarcnt-3"] = df["structuretaxvaluedollarcnt"] ** 3
+
+    # Average structuretaxvaluedollarcnt by city
+    group = df.groupby('regionidcity')['structuretaxvaluedollarcnt'].aggregate('mean').to_dict()
+    df['N-Avg-structuretaxvaluedollarcnt'] = df['regionidcity'].map(group)
+
+    # Deviation away from average
+    df['N-Dev-structuretaxvaluedollarcnt'] = abs(
+        (df['structuretaxvaluedollarcnt'] - df['N-Avg-structuretaxvaluedollarcnt'])) / df['N-Avg-structuretaxvaluedollarcnt']
+
+
+    # ----------------------------------------------------
+
+
     return df
 
 
@@ -91,23 +200,12 @@ print(split)
 train = train[train.logerror > -0.4]
 train = train[train.logerror < 0.419]
 
-# prop['latitude'] = prop['latitude']*1e-6
-# prop['longitude'] = prop['longitude']*1e-6
 
-# brc = Birch(branching_factor=50, n_clusters=None, threshold=0.03, compute_labels=True)
-# prop['loc_label'] = brc.fit_predict(prop[['latitude', 'longitude']])
+db = DBSCAN(eps=0.2, min_samples=25).fit(prop[['latitude', 'longitude']])
+prop.loc[:, 'loc_label'] = db.labels_
+num_clusters = len(set(db.labels_)) - (1 if -1 in db.labels_ else 0)
+print('Number of clusters: {}'.format(num_clusters))
 
-kmeans = MiniBatchKMeans(n_clusters=1200, batch_size=1000).fit(prop[['latitude', 'longitude']])
-prop.loc[:, 'loc_label'] = kmeans.labels_
-print('Number of loc label: {}'.format(len(set(prop['loc_label']))))
-prop[['parcelid','loc_label', 'longitude','latitude']].to_csv('../../data/loc_label.csv')
-
-prop['lati'] = prop['latitude']/10000
-prop['long'] = prop['longitude']/10000
-prop['lati'] = prop['lati'].apply(np.round)
-prop['long'] = prop['long'].apply(np.round)
-
-# TODO loc label
 df_train = train.merge(prop, how='left', on='parcelid')
 
 x_train = df_train
@@ -126,8 +224,8 @@ pd.Series(list(x_train.columns)).to_csv('../../data/columns.csv')
 del df_train; gc.collect()
 
 
-# x_train, y_train, x_valid, y_valid = x_train[:split], y_train[:split], x_train[split:], y_train[split:]
-# x_valid, y_valid = x_train[split:], y_train[split:]
+x_train, y_train, x_valid, y_valid = x_train[:split], y_train[:split], x_train[split:], y_train[split:]
+x_valid, y_valid = x_train[split:], y_train[split:]
 
 print('Building DMatrix...')
 
@@ -148,14 +246,12 @@ watchlist = [(d_train, 'train')]
 # TODO bad news 0.0644361 higher than previous CV set, interesting. 858
 # remove cv. back to last point. and continue to test features.
 # fold 2 , 0.0643877, overfitting is working. 620+-
-'''
-rint("Running XGBoost CV....")
+print("Running XGBoost CV....")
 res = xgb.cv(params, d_train, num_boost_round=2000, nfold=2,
                  early_stopping_rounds=100, verbose_eval=10, show_stdv=True)
 num_best_rounds = len(res)
 print("Number of best rounds: {}".format(num_best_rounds))
-'''
-num_best_rounds = 520  # [510]	train-mae:0.051073
+#num_best_rounds = 520
 clf = xgb.train(params, d_train, num_best_rounds, watchlist, verbose_eval=10)  # watchlist,  early_stopping_rounds=100, verbose_eval=10)
 
 fig, ax = plt.subplots(figsize=(20,40))

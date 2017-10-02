@@ -24,7 +24,7 @@ from sklearn.model_selection import train_test_split
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-drop_cols = ['logerror'] # ,'parcelid']
+drop_cols = ['logerror','parcelid'] # ,'parcelid']
 one_hot_encode_cols = ['rawcensustractandblock','censustractandblock','regionidneighborhood', 'airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid', 'fips', 'pooltypeid10','pooltypeid2', 'pooltypeid7','decktypeid']
 
 
@@ -53,11 +53,13 @@ def get_features(df):
     df['transaction_date'] = df['transaction_date'].dt.days
 
     df = df.drop('transactiondate', axis=1)
+    '''
     df['tax_rt'] = df['taxamount'] / df['taxvaluedollarcnt']
     df['extra_bathroom_cnt'] = df['bathroomcnt'] - df['bedroomcnt']
     df['room_sqt'] = df['calculatedfinishedsquarefeet']/(df['roomcnt'] + 1)
     df['structure_tax_rt'] = df['structuretaxvaluedollarcnt'] / df['taxvaluedollarcnt']
     df['land_tax_rt'] = df['landtaxvaluedollarcnt'] / df['taxvaluedollarcnt']
+    '''
 
     # 商圈内待售房屋数量
     df = merge_nunique(df, ['loc_label'], 'parcelid', 'loc_building_num')
@@ -87,108 +89,7 @@ def get_features(df):
         df = merge_mean(df, ['regionidcounty'], col, 'county_'+col+'_mean')
         df = merge_mean(df, ['lati', 'long'], col, 'county_'+col+'_mean')
 
-
-        df = merge_median(df, ['loc_label'], col, 'loc_'+col+'_median')
-        df = merge_median(df, ['regionidzip'], col, 'region_'+col+'_median')
-        df = merge_median(df, ['regionidcity'], col, 'city_'+col+'_median')
-        df = merge_median(df, ['regionidcounty'], col, 'county_'+col+'_median')
-        df = merge_median(df, ['lati', 'long'], col, 'county_'+col+'_median')
-
-        df = merge_std(df, ['loc_label'], col, 'loc_'+col+'_std')
-        df = merge_std(df, ['regionidzip'], col, 'region_'+col+'_std')
-        df = merge_std(df, ['regionidcity'], col, 'city_'+col+'_std')
-        df = merge_std(df, ['regionidcounty'], col, 'county_'+col+'_std')
-        df = merge_std(df, ['lati', 'long'], col, 'county_'+col+'_std')
-
-    for col in ['finishedsquarefeet12', 'garagetotalsqft', 'calculatedfinishedsquarefeet', 'lotsizesquarefeet',
-                'unitcnt', 'poolcnt', 'taxamount', 'taxvaluedollarcnt', 'landtaxvaluedollarcnt']:
-
-        df = merge_sum(df, ['loc_label'], col, 'loc_'+col+'_sum')
-        df = merge_sum(df, ['regionidzip'], col, 'region_'+col+'_sum')
-        df = merge_sum(df, ['regionidcity'], col, 'city_'+col+'_sum')
-        df = merge_sum(df, ['regionidcounty'], col, 'county_'+col+'_sum')
-        df = merge_sum(df, ['lati', 'long'], col, 'county_'+col+'_sum')
     # -----------------------------------------------------------------------------------------------
-
-    # life of property
-    df['N-life'] = 2018 - df['yearbuilt']
-
-    # error in calculation of the finished living area of home
-    df['N-LivingAreaError'] = df['calculatedfinishedsquarefeet'] / df['finishedsquarefeet12']
-
-    # proportion of living area
-    df['N-LivingAreaProp'] = df['calculatedfinishedsquarefeet'] / df['lotsizesquarefeet']
-    df['N-LivingAreaProp2'] = df['finishedsquarefeet12'] / df['finishedsquarefeet15']
-
-    # Amout of extra space
-    df['N-ExtraSpace'] = df['lotsizesquarefeet'] - df['calculatedfinishedsquarefeet']
-    df['N-ExtraSpace-2'] = df['finishedsquarefeet15'] - df['finishedsquarefeet12']
-
-    # Total number of rooms
-    df['N-TotalRooms'] = df['bathroomcnt'] * df['bedroomcnt']
-
-    # Average room size
-    df['N-AvRoomSize'] = df['calculatedfinishedsquarefeet'] / df['roomcnt']
-
-    # Number of Extra rooms
-    df['N-ExtraRooms'] = df['roomcnt'] - df['N-TotalRooms']
-
-    # Ratio of the built structure value to land area
-    df['N-ValueProp'] = df['structuretaxvaluedollarcnt'] / df['landtaxvaluedollarcnt']
-
-    # Does property have a garage, pool or hot tub and AC?
-    df['N-GarPoolAC'] = ((df['garagecarcnt'] > 0) & (df['pooltypeid10'] > 0) & (
-    df['airconditioningtypeid'] != 5)) * 1
-
-    df["N-location"] = df["latitude"] + df["longitude"]
-    df["N-location-2"] = df["latitude"] * df["longitude"]
-    df["N-location-2round"] = df["N-location-2"].round(-4)
-
-    df["N-latitude-round"] = df["latitude"].round(-4)
-    df["N-longitude-round"] = df["longitude"].round(-4)
-
-
-    # ---------------------------------
-    # Ratio of tax of property over parcel
-    df['N-ValueRatio'] = df['taxvaluedollarcnt'] / df['taxamount']
-
-    # TotalTaxScore
-    df['N-TaxScore'] = df['taxvaluedollarcnt'] * df['taxamount']
-
-    # polnomials of tax delinquency year
-    df["N-taxdelinquencyyear-2"] = df["taxdelinquencyyear"] ** 2
-    df["N-taxdelinquencyyear-3"] = df["taxdelinquencyyear"] ** 3
-
-    # Length of time since unpaid taxes
-    df['N-life-tax'] = 2018 - df['taxdelinquencyyear']
-
-    #-------------------------------------------
-
-    # Indicator whether it has AC or not
-    df['N-ACInd'] = (df['airconditioningtypeid'] != 5) * 1
-
-    # Indicator whether it has Heating or not
-    df['N-HeatInd'] = (df['heatingorsystemtypeid'] != 13) * 1
-
-
-
-    #----------------------------------------------
-
-    # polnomials of the variable
-    df["N-structuretaxvaluedollarcnt-2"] = df["structuretaxvaluedollarcnt"] ** 2
-    df["N-structuretaxvaluedollarcnt-3"] = df["structuretaxvaluedollarcnt"] ** 3
-
-    # Average structuretaxvaluedollarcnt by city
-    group = df.groupby('regionidcity')['structuretaxvaluedollarcnt'].aggregate('mean').to_dict()
-    df['N-Avg-structuretaxvaluedollarcnt'] = df['regionidcity'].map(group)
-
-    # Deviation away from average
-    df['N-Dev-structuretaxvaluedollarcnt'] = abs(
-        (df['structuretaxvaluedollarcnt'] - df['N-Avg-structuretaxvaluedollarcnt'])) / df['N-Avg-structuretaxvaluedollarcnt']
-
-
-    # ----------------------------------------------------
-
 
     return df
 
@@ -237,7 +138,7 @@ prop['N-PropType'] = prop.propertylandusetypeid.replace(
 # brc = Birch(branching_factor=5, n_clusters=None, threshold=0.02, compute_labels=True)
 # prop['loc_label'] = brc.fit_predict(prop[['latitude', 'longitude']])
 
-kmeans = MiniBatchKMeans(n_clusters=4000, batch_size=2000).fit(prop[['latitude', 'longitude']])
+kmeans = MiniBatchKMeans(n_clusters=2000, batch_size=1000).fit(prop[['latitude', 'longitude']])
 prop.loc[:, 'loc_label'] = kmeans.labels_
 print('Number of loc label: {}'.format(len(set(prop['loc_label']))))
 
@@ -276,7 +177,7 @@ assert not np.any(np.isinf(x_train))
 
 scaler_dict = {}
 for n_col in numeric_cols:
-    scaler = preprocessing.MinMaxScaler(feature_range=(-1, 1))
+    scaler = preprocessing.StandardScaler()#MinMaxScaler(feature_range=(-1, 1))
     scaler.fit(x_train[n_col].values.reshape(-1,1))
     x_train[n_col] = scaler.transform(x_train[n_col].values.reshape(-1,1))
     scaler_dict[n_col] = scaler
@@ -310,11 +211,11 @@ feature_category_cols_emb = [tf.feature_column.embedding_column(k, dimension=8) 
 feature_cols.extend(feature_category_cols_emb)
 print(len(feature_cols))
 hidden_units = []
-hidden_units.extend([256,256, 128, 64])
+hidden_units.extend([512, 256, 128, 64])
 hidden_units.extend([])
 print(hidden_units)
 regressor = tf.estimator.DNNRegressor(feature_columns=feature_cols, hidden_units=hidden_units,
-                                      model_dir=model_dir)#, activation_fn=selu.selu, optimizer=tf.train.AdagradOptimizer(learning_rate=0.003))
+                                      model_dir=model_dir, dropout=0.2)   #=tf.train.AdagradOptimizer(learning_rate=0.003))
 
 LABEL = 'logerror'
 
@@ -327,9 +228,9 @@ def get_input_fn(data_set, label, num_epochs=None, shuffle=True):
       shuffle=shuffle)
 
 print(x_train.head())
-regressor.train(input_fn=get_input_fn(x_train, y_train), steps=50)
+regressor.train(input_fn=get_input_fn(x_train, y_train), steps=100)
 
-for i in range(100):
+for i in range(10):
     print(str(i))
     '''
     ev = regressor.evaluate(
@@ -358,7 +259,7 @@ for i in range(100):
         print(predictions)
         # break
 
-    regressor.train(input_fn=get_input_fn(x_train, y_train), steps=50)
+    regressor.train(input_fn=get_input_fn(x_train, y_train), steps=1)
 
 raw_input("Enter something to continue ...")
 print('Building test set ...')
