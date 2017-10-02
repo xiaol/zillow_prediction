@@ -41,7 +41,7 @@ def get_features(df):
     df['land_tax_rt'] = df['landtaxvaluedollarcnt'] / df['taxvaluedollarcnt']
 
     # 商圈内待售房屋数量
-    df = merge_nunique(df, ['loc_label'], 'parcelid', 'loc_building_num')
+    #df = merge_nunique(df, ['loc_label'], 'parcelid', 'loc_building_num')
     df = merge_nunique(df, ['regionidzip'], 'parcelid', 'region_property_num')
     df = merge_nunique(df, ['regionidcity'], 'parcelid', 'city_property_num')
     df = merge_nunique(df, ['regionidcounty'], 'parcelid', 'county_property_num')
@@ -56,26 +56,26 @@ def get_features(df):
         df = merge_count(df, [col_time[0],'regionidcity'], 'parcelid', col_time[1]+'_city_transaction_count')
         df = merge_count(df, [col_time[0],'regionidzip'], 'parcelid', col_time[1]+'_region_transaction_count')
         df = merge_count(df, [col_time[0],'regionidcounty'], 'parcelid', col_time[1]+'_county_transaction_count')
-        df = merge_count(df, [col_time[0],'loc_label'], 'parcelid', col_time[1]+'_loc_transaction_count')
+        #df = merge_count(df, [col_time[0],'loc_label'], 'parcelid', col_time[1]+'_loc_transaction_count')
         df = merge_count(df, [col_time[0],'lati', 'long'], 'parcelid', col_time[1]+'_lati_long_transaction_count')
     # 商圈房屋状况均值
     for col in ['finishedsquarefeet12', 'garagetotalsqft', 'yearbuilt', 'calculatedfinishedsquarefeet', 'lotsizesquarefeet',
                 'unitcnt', 'poolcnt', 'taxamount', 'taxvaluedollarcnt', 'landtaxvaluedollarcnt', 'buildingqualitytypeid','bathroomcnt','roomcnt',
                 'fullbathcnt','calculatedbathnbr']:
-        df = merge_mean(df, ['loc_label'], col, 'loc_'+col+'_mean')
+        #df = merge_mean(df, ['loc_label'], col, 'loc_'+col+'_mean')
         df = merge_mean(df, ['regionidzip'], col, 'region_'+col+'_mean')
         df = merge_mean(df, ['regionidcity'], col, 'city_'+col+'_mean')
         df = merge_mean(df, ['regionidcounty'], col, 'county_'+col+'_mean')
         df = merge_mean(df, ['lati', 'long'], col, 'county_'+col+'_mean')
 
 
-        df = merge_median(df, ['loc_label'], col, 'loc_'+col+'_median')
+        #df = merge_median(df, ['loc_label'], col, 'loc_'+col+'_median')
         df = merge_median(df, ['regionidzip'], col, 'region_'+col+'_median')
         df = merge_median(df, ['regionidcity'], col, 'city_'+col+'_median')
         df = merge_median(df, ['regionidcounty'], col, 'county_'+col+'_median')
         df = merge_median(df, ['lati', 'long'], col, 'county_'+col+'_median')
 
-        df = merge_std(df, ['loc_label'], col, 'loc_'+col+'_std')
+        #df = merge_std(df, ['loc_label'], col, 'loc_'+col+'_std')
         df = merge_std(df, ['regionidzip'], col, 'region_'+col+'_std')
         df = merge_std(df, ['regionidcity'], col, 'city_'+col+'_std')
         df = merge_std(df, ['regionidcounty'], col, 'county_'+col+'_std')
@@ -84,7 +84,7 @@ def get_features(df):
     for col in ['finishedsquarefeet12', 'garagetotalsqft', 'calculatedfinishedsquarefeet', 'lotsizesquarefeet',
                 'unitcnt', 'poolcnt', 'taxamount', 'taxvaluedollarcnt', 'landtaxvaluedollarcnt']:
 
-        df = merge_sum(df, ['loc_label'], col, 'loc_'+col+'_sum')
+        #df = merge_sum(df, ['loc_label'], col, 'loc_'+col+'_sum')
         df = merge_sum(df, ['regionidzip'], col, 'region_'+col+'_sum')
         df = merge_sum(df, ['regionidcity'], col, 'city_'+col+'_sum')
         df = merge_sum(df, ['regionidcounty'], col, 'county_'+col+'_sum')
@@ -200,11 +200,17 @@ print(split)
 train = train[train.logerror > -0.4]
 train = train[train.logerror < 0.419]
 
-
+'''
 db = DBSCAN(eps=0.2, min_samples=25).fit(prop[['latitude', 'longitude']])
 prop.loc[:, 'loc_label'] = db.labels_
 num_clusters = len(set(db.labels_)) - (1 if -1 in db.labels_ else 0)
 print('Number of clusters: {}'.format(num_clusters))
+'''
+
+prop['lati'] = prop['latitude']/10000
+prop['long'] = prop['longitude']/10000
+prop['lati'] = prop['lati'].apply(np.round)
+prop['long'] = prop['long'].apply(np.round)
 
 df_train = train.merge(prop, how='left', on='parcelid')
 
