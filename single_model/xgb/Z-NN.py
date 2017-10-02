@@ -25,7 +25,7 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 drop_cols = ['logerror'] # ,'parcelid']
-one_hot_encode_cols = ['rawcensustractandblock','censustractandblock','regionidneighborhood', 'parcelid', 'airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid', 'fips', 'pooltypeid10','pooltypeid2', 'pooltypeid7','decktypeid']
+one_hot_encode_cols = ['rawcensustractandblock','censustractandblock','regionidneighborhood', 'airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid', 'fips', 'pooltypeid10','pooltypeid2', 'pooltypeid7','decktypeid']
 
 
 def MAE(yhat, y):

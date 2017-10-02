@@ -16,8 +16,8 @@ import matplotlib.pyplot as plt
 from sklearn.cluster import MiniBatchKMeans
 
 drop_cols = ['parcelid', 'logerror']
-#one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid', 'fips']
-one_hot_encode_cols = ['rawcensustractandblock','censustractandblock','regionidneighborhood', 'parcelid', 'airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid', 'fips', 'pooltypeid10','pooltypeid2', 'pooltypeid7','decktypeid']
+# one_hot_encode_cols = ['rawcensustractandblock','censustractandblock','regionidneighborhood', 'airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid', 'fips']
+one_hot_encode_cols = ['rawcensustractandblock','censustractandblock','regionidneighborhood', 'airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid', 'fips', 'pooltypeid10','pooltypeid2', 'pooltypeid7','decktypeid']
 
 
 def prepare_data(df, columns):
