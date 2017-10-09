@@ -15,9 +15,9 @@ import matplotlib.pyplot as plt
 
 from bayes_opt import BayesianOptimization
 
-
-drop_cols = ['parcelid', 'logerror']
-one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid', 'fips']
+# TODO propertyzoningdesc ,remove from one hot , regionidcity, regionidneighborhood, regionidzip,
+drop_cols = ['parcelid', 'logerror', 'propertyzoningdesc'] # 'regionidcity', 'regionidneighborhood', 'regionidzip',]
+one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcounty','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'typeconstructiontypeid', 'fips']
 
 
 def prepare_data(df, columns):
@@ -65,6 +65,7 @@ def get_features(df):
     for col in ['finishedsquarefeet12', 'garagetotalsqft', 'yearbuilt', 'calculatedfinishedsquarefeet', 'lotsizesquarefeet',
                 'unitcnt', 'poolcnt', 'taxamount', 'taxvaluedollarcnt', 'landtaxvaluedollarcnt', 'buildingqualitytypeid','bathroomcnt','roomcnt',
                 'fullbathcnt','calculatedbathnbr']:
+        #TODO select features
         df = merge_mean(df, ['loc_label'], col, 'loc_'+col+'_mean')
         df = merge_mean(df, ['regionidzip'], col, 'region_'+col+'_mean')
         df = merge_mean(df, ['regionidcity'], col, 'city_'+col+'_mean')
@@ -244,7 +245,7 @@ del x_train; gc.collect()
 
 print('Training ...')
 
-params = {'eta': 0.015, 'objective': 'reg:linear', 'eval_metric': 'mae', 'min_child_weight': 1.5, 'colsample_bytree': 0.2, 'max_depth': 7, 'lambda': 0.3, 'alpha': 0.6, 'silent': 1}
+params = {'eta': 0.015, 'objective': 'reg:linear', 'eval_metric': 'mae', 'min_child_weight': 1.5, 'colsample_bytree': 0.2, 'max_depth': 7,  'alpha': 0.6, 'silent': 1}
 
 print(params)
 
@@ -254,11 +255,12 @@ watchlist = [(d_train, 'train')]
 # remove cv. back to last point. and continue to test features.
 # fold 2 , 0.0643877, overfitting is working. 620+-
 print("Running XGBoost CV....")
+'''
 res = xgb.cv(params, d_train, num_boost_round=2000, nfold=2,
                  early_stopping_rounds=100, verbose_eval=10, show_stdv=True)
 num_best_rounds = len(res)
 print("Number of best rounds: {}".format(num_best_rounds))
-
+'''
 
 def xgb_evaluate(min_child_weight,
                  colsample_bytree,
@@ -293,7 +295,7 @@ xgbBO.maximize(init_points=init_points, n_iter=num_iter)
 
 raw_input("Enter something to continue ...")
 
-#num_best_rounds = 520
+num_best_rounds = 520
 clf = xgb.train(params, d_train, num_best_rounds, watchlist, verbose_eval=10)  # watchlist,  early_stopping_rounds=100, verbose_eval=10)
 
 fig, ax = plt.subplots(figsize=(40,120))
