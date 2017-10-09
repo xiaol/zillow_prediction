@@ -13,6 +13,9 @@ import matplotlib
 matplotlib.use('pdf')
 import matplotlib.pyplot as plt
 
+from bayes_opt import BayesianOptimization
+
+
 drop_cols = ['parcelid', 'logerror']
 one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid', 'fips']
 
@@ -66,20 +69,20 @@ def get_features(df):
         df = merge_mean(df, ['regionidzip'], col, 'region_'+col+'_mean')
         df = merge_mean(df, ['regionidcity'], col, 'city_'+col+'_mean')
         df = merge_mean(df, ['regionidcounty'], col, 'county_'+col+'_mean')
-        df = merge_mean(df, ['lati', 'long'], col, 'county_'+col+'_mean')
+        df = merge_mean(df, ['lati', 'long'], col, 'lati_long_'+col+'_mean')
 
 
         df = merge_median(df, ['loc_label'], col, 'loc_'+col+'_median')
         df = merge_median(df, ['regionidzip'], col, 'region_'+col+'_median')
         df = merge_median(df, ['regionidcity'], col, 'city_'+col+'_median')
         df = merge_median(df, ['regionidcounty'], col, 'county_'+col+'_median')
-        df = merge_median(df, ['lati', 'long'], col, 'county_'+col+'_median')
+        df = merge_median(df, ['lati', 'long'], col, 'lati_long_'+col+'_median')
 
         df = merge_std(df, ['loc_label'], col, 'loc_'+col+'_std')
         df = merge_std(df, ['regionidzip'], col, 'region_'+col+'_std')
         df = merge_std(df, ['regionidcity'], col, 'city_'+col+'_std')
         df = merge_std(df, ['regionidcounty'], col, 'county_'+col+'_std')
-        df = merge_std(df, ['lati', 'long'], col, 'county_'+col+'_std')
+        df = merge_std(df, ['lati', 'long'], col, 'lati_long_'+col+'_std')
 
     for col in ['finishedsquarefeet12', 'garagetotalsqft', 'calculatedfinishedsquarefeet', 'lotsizesquarefeet',
                 'unitcnt', 'poolcnt', 'taxamount', 'taxvaluedollarcnt', 'landtaxvaluedollarcnt']:
@@ -88,7 +91,7 @@ def get_features(df):
         df = merge_sum(df, ['regionidzip'], col, 'region_'+col+'_sum')
         df = merge_sum(df, ['regionidcity'], col, 'city_'+col+'_sum')
         df = merge_sum(df, ['regionidcounty'], col, 'county_'+col+'_sum')
-        df = merge_sum(df, ['lati', 'long'], col, 'county_'+col+'_sum')
+        df = merge_sum(df, ['lati', 'long'], col, 'lati_long_'+col+'_sum')
     # -----------------------------------------------------------------------------------------------
 
     # life of property
@@ -255,13 +258,48 @@ res = xgb.cv(params, d_train, num_boost_round=2000, nfold=2,
                  early_stopping_rounds=100, verbose_eval=10, show_stdv=True)
 num_best_rounds = len(res)
 print("Number of best rounds: {}".format(num_best_rounds))
+
+
+def xgb_evaluate(min_child_weight,
+                 colsample_bytree,
+                 max_depth,
+                 subsample,
+                 gamma,
+                 alpha):
+
+    params['min_child_weight'] = int(min_child_weight)
+    params['cosample_bytree'] = max(min(colsample_bytree, 1), 0)
+    params['max_depth'] = int(max_depth)
+    params['subsample'] = max(min(subsample, 1), 0)
+    params['gamma'] = max(gamma, 0)
+    params['alpha'] = max(alpha, 0)
+
+    cv_result  = xgb.cv(params, d_train, num_boost_round=2000, nfold=2,
+                 early_stopping_rounds=100, verbose_eval=10, show_stdv=True)
+
+    return -cv_result['test-mae-mean'].values[-1]
+
+xgbBO = BayesianOptimization(xgb_evaluate, {'min_child_weight': (1, 20),
+                                                'colsample_bytree': (0.1, 1),
+                                                'max_depth': (5, 15),
+                                                'subsample': (0.5, 1),
+                                                'gamma': (0, 10),
+                                                'alpha': (0, 10),
+                                                })
+
+num_iter = 25
+init_points = 5
+xgbBO.maximize(init_points=init_points, n_iter=num_iter)
+
+raw_input("Enter something to continue ...")
+
 #num_best_rounds = 520
 clf = xgb.train(params, d_train, num_best_rounds, watchlist, verbose_eval=10)  # watchlist,  early_stopping_rounds=100, verbose_eval=10)
 
 fig, ax = plt.subplots(figsize=(40,120))
 xgb.plot_importance(clf, max_num_features=500, height=0.8, ax=ax)
 plt.savefig('../../data/importance.pdf')
-ft_weights = pd.DataFrame(clf.feature_importances_, columns=['weights'], index=train_columns)
+# ft_weights = pd.DataFrame(clf.feature_importances_, columns=['weights'], index=train_columns)
 
 # del d_train, d_valid
 del d_train

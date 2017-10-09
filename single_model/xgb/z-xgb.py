@@ -132,6 +132,10 @@ res = xgb.cv(params, d_train, num_boost_round=2000, nfold=2,
 num_best_rounds = len(res)
 print("Number of best rounds: {}".format(num_best_rounds))
 '''
+
+
+
+
 num_best_rounds = 520
 clf = xgb.train(params, d_train, num_best_rounds, watchlist, verbose_eval=10)  # watchlist,  early_stopping_rounds=100, verbose_eval=10)
 
