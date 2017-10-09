@@ -258,9 +258,11 @@ print("Number of best rounds: {}".format(num_best_rounds))
 #num_best_rounds = 520
 clf = xgb.train(params, d_train, num_best_rounds, watchlist, verbose_eval=10)  # watchlist,  early_stopping_rounds=100, verbose_eval=10)
 
-fig, ax = plt.subplots(figsize=(20,80))
-xgb.plot_importance(clf, max_num_features=200, height=0.8, ax=ax)
+fig, ax = plt.subplots(figsize=(40,120))
+xgb.plot_importance(clf, max_num_features=500, height=0.8, ax=ax)
 plt.savefig('../../data/importance.pdf')
+ft_weights = pd.DataFrame(clf.feature_importances_, columns=['weights'], index=train_columns)
+
 # del d_train, d_valid
 del d_train
 

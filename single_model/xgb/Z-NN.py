@@ -211,7 +211,7 @@ feature_category_cols_emb = [tf.feature_column.embedding_column(k, dimension=8) 
 feature_cols.extend(feature_category_cols_emb)
 print(len(feature_cols))
 hidden_units = []
-hidden_units.extend([512, 256, 128, 64])
+hidden_units.extend([512, 512, 512,512])
 hidden_units.extend([])
 print(hidden_units)
 regressor = tf.estimator.DNNRegressor(feature_columns=feature_cols, hidden_units=hidden_units,
