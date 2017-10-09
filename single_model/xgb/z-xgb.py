@@ -60,8 +60,8 @@ def chunks(l, n):
 
 print('Loading data ...')
 
-train = pd.read_csv('../../data/train_2016_v2.csv')
-prop = pd.read_csv('../../data/properties_2016.csv').fillna(-0.001)  # , nrows=500)
+train = pd.read_csv('../../data/train_2017.csv')
+prop = pd.read_csv('../../data/properties_2017.csv').fillna(-0.001)  # , nrows=500)
 sample = pd.read_csv('../../data/sample_submission.csv')
 '''
 print('Binding to float32')
@@ -72,8 +72,8 @@ for c, dtype in zip(prop.columns, prop.dtypes):
 
 print('Creating training set ...')
 train = train.sort_values('transactiondate')
-train = train[train.transactiondate < '2017-01-01']
-split = train[train.transactiondate < '2016-10-01'].shape[0]
+train = train[train.transactiondate < '2017-10-01']
+split = train[train.transactiondate < '2017-10-01'].shape[0]
 print(split)
 
 train = train[train.logerror > -0.4]

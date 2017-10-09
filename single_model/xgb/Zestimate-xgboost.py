@@ -230,8 +230,8 @@ pd.Series(list(x_train.columns)).to_csv('../../data/columns.csv')
 del df_train; gc.collect()
 
 
-x_train, y_train, x_valid, y_valid = x_train[:split], y_train[:split], x_train[split:], y_train[split:]
-x_valid, y_valid = x_train[split:], y_train[split:]
+# x_train, y_train, x_valid, y_valid = x_train[:split], y_train[:split], x_train[split:], y_train[split:]
+# x_valid, y_valid = x_train[split:], y_train[split:]
 
 print('Building DMatrix...')
 
