@@ -101,8 +101,8 @@ def chunks(l, n):
 
 print('Loading data ...')
 
-train = pd.read_csv('../../data/train_2016_v2.csv')
-prop = pd.read_csv('../../data/properties_2016.csv').fillna(0)  # , nrows=500)
+train = pd.read_csv('../../data/train_2017.csv')
+prop = pd.read_csv('../../data/properties_2017.csv').fillna(0)  # , nrows=500)
 sample = pd.read_csv('../../data/sample_submission.csv')
 
 string_cols = []
@@ -138,7 +138,7 @@ prop['N-PropType'] = prop.propertylandusetypeid.replace(
 # brc = Birch(branching_factor=5, n_clusters=None, threshold=0.02, compute_labels=True)
 # prop['loc_label'] = brc.fit_predict(prop[['latitude', 'longitude']])
 
-kmeans = MiniBatchKMeans(n_clusters=2000, batch_size=1000).fit(prop[['latitude', 'longitude']])
+kmeans = MiniBatchKMeans(n_clusters=100, batch_size=1000).fit(prop[['latitude', 'longitude']])
 prop.loc[:, 'loc_label'] = kmeans.labels_
 print('Number of loc label: {}'.format(len(set(prop['loc_label']))))
 
@@ -230,7 +230,7 @@ def get_input_fn(data_set, label, num_epochs=None, shuffle=True):
 print(x_train.head())
 regressor.train(input_fn=get_input_fn(x_train, y_train), steps=100)
 
-for i in range(10):
+for i in range(50):
     print(str(i))
     '''
     ev = regressor.evaluate(
@@ -259,7 +259,7 @@ for i in range(10):
         print(predictions)
         # break
 
-    regressor.train(input_fn=get_input_fn(x_train, y_train), steps=1)
+    regressor.train(input_fn=get_input_fn(x_train, y_train), steps=10)
 
 raw_input("Enter something to continue ...")
 print('Building test set ...')
