@@ -244,8 +244,12 @@ d_train = xgb.DMatrix(x_train, label=y_train)
 del x_train; gc.collect()
 
 print('Training ...')
-
-params = {'eta': 0.015, 'objective': 'reg:linear', 'eval_metric': 'mae', 'min_child_weight': 1.5, 'colsample_bytree': 0.2, 'max_depth': 7,  'alpha': 0.6, 'silent': 1}
+'''
+ Step |Time | Value | alpha | colsample_bytree |gamma |max_depth |min_child_weight |subsample |
+25 9m50s | - 0.05225 | 9.7207 |0.3694 | 0.0154  | 11.3092  | 19.7752  |  0.9527  |  
+7 | 11m46s | -0.05226| 5.8705 |0.2563 | 0.0096 |  14.5790 |  19.7840 |   0.8182 |
+'''
+params = {'eta': 0.015, 'objective': 'reg:linear', 'eval_metric': 'mae', 'aplpha': 5.8705, 'colsample_bytree': 0.2563, 'gamma':0.0096,'max_depth': 14.5790, 'min_child_weight': 19.7840,'subsample':0.8182, 'silent': 1}
 
 print(params)
 
@@ -255,7 +259,6 @@ watchlist = [(d_train, 'train')]
 # remove cv. back to last point. and continue to test features.
 # fold 2 , 0.0643877, overfitting is working. 620+-
 print("Running XGBoost CV....")
-'''
 res = xgb.cv(params, d_train, num_boost_round=2000, nfold=2,
                  early_stopping_rounds=100, verbose_eval=10, show_stdv=True)
 num_best_rounds = len(res)
@@ -296,6 +299,8 @@ xgbBO.maximize(init_points=init_points, n_iter=num_iter)
 raw_input("Enter something to continue ...")
 
 num_best_rounds = 520
+
+'''
 clf = xgb.train(params, d_train, num_best_rounds, watchlist, verbose_eval=10)  # watchlist,  early_stopping_rounds=100, verbose_eval=10)
 
 fig, ax = plt.subplots(figsize=(40,120))
