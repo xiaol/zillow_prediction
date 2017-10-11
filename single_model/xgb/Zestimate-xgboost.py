@@ -17,8 +17,8 @@ from bayes_opt import BayesianOptimization
 
 # TODO propertyzoningdesc ,remove from one hot , regionidcity, regionidneighborhood, regionidzip,
 drop_cols = ['parcelid', 'logerror', 'propertyzoningdesc'] # 'regionidcity', 'regionidneighborhood', 'regionidzip',]
-one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcounty','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'typeconstructiontypeid', 'fips']
-
+# one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcounty','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'typeconstructiontypeid', 'fips']
+one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid', 'fips']
 
 def prepare_data(df, columns):
     df = pd.get_dummies(df, columns=columns, prefix=columns, sparse=True)
@@ -267,7 +267,7 @@ watchlist = [(d_train, 'train')]
 # remove cv. back to last point. and continue to test features.
 # fold 2 , 0.0643877, overfitting is working. 620+-
 print("Running XGBoost CV....")
-res = xgb.cv(params, d_train, num_boost_round=5000, nfold=2,
+res = xgb.cv(params, d_train, num_boost_round=5000, nfold=4,stratified=True,
                  early_stopping_rounds=100, verbose_eval=10, show_stdv=True)
 num_best_rounds = len(res)
 print("Number of best rounds: {}".format(num_best_rounds))
