@@ -250,11 +250,14 @@ print('Training ...')
 7 | 11m46s | -0.05226| 5.8705 |0.2563        | 0.0096 |  14.5790 |  19.7840 |   0.8182 |
 
 18 | 35m01s |-0.05236 |9.1410 |0.5087        | 0.0786 |  14.5949 |  1.7226 |      0.9350 |
-26 | 96m17s |   -0.05251 | 0.3411 |0.3419 |    0.2926 |     13.8395 |             1.0616 |      0.8094 |
-27 | 18m21s |   -0.05244 |    6.9886 |             0.2620 |    0.0979 |     11.0493 |            19.9869 |      0.5133 |
- 29 | 34m36s |   -0.05229 |    9.5245 |             0.7570 |    0.0529 |     14.6558 |            19.5906 |      0.8808 |
+[460]   train-mae:0.0456685+2.85e-05    test-mae:0.0525965+0.0001055
+
+26 | 96m17s |   -0.05251 | 0.3411 |0.3419    | 0.2926 |  13.8395 |  1.0616 |      0.8094 |
+27 | 18m21s |   -0.05244 | 6.9886 |0.2620 |    0.0979 |  11.0493 | 19.9869 |      0.5133 |
+ 29 | 34m36s |   -0.05229 | 9.5245 | 0.7570 |  0.0529 |  14.6558 | 19.5906 |      0.8808 |
 '''
-params = {'eta': 0.015, 'objective': 'reg:linear', 'eval_metric': 'mae', 'aplpha': 5.8705, 'colsample_bytree': 0.2563, 'gamma':0.0096,'max_depth': 14, 'min_child_weight': 19,'subsample':0.8182, 'silent': 1}
+params = {'eta': 0.015, 'objective': 'reg:linear', 'eval_metric': 'mae', 'aplpha': 0.3411, 'colsample_bytree': 0.3419, 'gamma':0.2926,'max_depth': 13, 'min_child_weight': 1.0616,'subsample':0.8094, 'silent': 1}
+
 
 print(params)
 
@@ -264,7 +267,7 @@ watchlist = [(d_train, 'train')]
 # remove cv. back to last point. and continue to test features.
 # fold 2 , 0.0643877, overfitting is working. 620+-
 print("Running XGBoost CV....")
-res = xgb.cv(params, d_train, num_boost_round=2000, nfold=2,
+res = xgb.cv(params, d_train, num_boost_round=5000, nfold=2,
                  early_stopping_rounds=100, verbose_eval=10, show_stdv=True)
 num_best_rounds = len(res)
 print("Number of best rounds: {}".format(num_best_rounds))

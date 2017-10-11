@@ -116,7 +116,8 @@ del x_train; gc.collect()
 
 print('Training ...')
 
-params = {'eta': 0.015, 'objective': 'reg:linear', 'eval_metric': 'mae', 'min_child_weight': 1.5, 'colsample_bytree': 0.2, 'max_depth': 7, 'lambda': 0.3, 'alpha': 0.6, 'silent': 1}
+params = {'eta': 0.015, 'objective': 'reg:linear', 'eval_metric': 'mae', 'aplpha': 0.3411, 'colsample_bytree': 0.3419, 'gamma':0.2926,'max_depth': 13, 'min_child_weight': 1.0616,'subsample':0.8094, 'silent': 1}
+
 
 print(params)
 
