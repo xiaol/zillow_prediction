@@ -50,7 +50,7 @@ def get_features(df):
     df = merge_nunique(df, ['regionidcounty'], 'parcelid', 'county_property_num')
     df = merge_nunique(df, ['lati', 'long'], 'parcelid', 'county_property_num')
 
-    for col_time in [('transaction_month','month'), ('transaction_month_day','month_day'), ('transaction_day', 'day'), ('yearbuilt','year_built'),
+    for col_time in [('transaction_month','month'), ('transaction_month_day','month_day'), ('transaction_day', 'day'),('transaction_date','date'), ('yearbuilt','year_built'),
                      ('assessmentyear', 'assessmentyear'), ('buildingqualitytypeid','buildingqualitytypeid'), ('heatingorsystemtypeid', 'heatingorsystemtypeid'),('storytypeid', 'storytypeid'),
                      ('propertylandusetypeid','propertylandusetypeid'), ('pooltypeid10','pooltypeid10'), ('pooltypeid2','pooltypeid2'), ('pooltypeid7','pooltypeid7'),
                      ('architecturalstyletypeid', 'architecturalstyletypeid'), ('buildingclasstypeid','buildingclasstypeid'),
@@ -61,6 +61,10 @@ def get_features(df):
         df = merge_count(df, [col_time[0],'regionidcounty'], 'parcelid', col_time[1]+'_county_transaction_count')
         df = merge_count(df, [col_time[0],'loc_label'], 'parcelid', col_time[1]+'_loc_transaction_count')
         df = merge_count(df, [col_time[0],'lati', 'long'], 'parcelid', col_time[1]+'_lati_long_transaction_count')
+
+    for some_col in ['parcelid', ]:
+        df = merge_count(df, ['transaction_date'], some_col, 'date_'+ some_col +'_count')
+
     # 商圈房屋状况均值
     for col in ['finishedsquarefeet12', 'garagetotalsqft', 'yearbuilt', 'calculatedfinishedsquarefeet', 'lotsizesquarefeet',
                 'unitcnt', 'poolcnt', 'taxamount', 'taxvaluedollarcnt', 'landtaxvaluedollarcnt', 'buildingqualitytypeid','bathroomcnt','roomcnt',
@@ -214,6 +218,24 @@ prop['long'] = prop['longitude']/10000
 prop['lati'] = prop['lati'].apply(np.round)
 prop['long'] = prop['long'].apply(np.round)
 
+for col_time in [
+                 ('yearbuilt', 'year_built'),
+                 ('assessmentyear', 'assessmentyear'), ('buildingqualitytypeid', 'buildingqualitytypeid'),
+                 ('heatingorsystemtypeid', 'heatingorsystemtypeid'), ('storytypeid', 'storytypeid'),
+                 ('propertylandusetypeid', 'propertylandusetypeid'), ('pooltypeid10', 'pooltypeid10'),
+                 ('pooltypeid2', 'pooltypeid2'), ('pooltypeid7', 'pooltypeid7'),
+                 ('architecturalstyletypeid', 'architecturalstyletypeid'),
+                 ('buildingclasstypeid', 'buildingclasstypeid'),
+                 ('propertylandusetypeid', 'propertylandusetypeid'),
+                 ('propertycountylandusecode', 'propertycountylandusecode'),
+                 ('propertyzoningdesc', 'propertyzoningdesc'),
+                 ('typeconstructiontypeid', 'typeconxstructiontypeid')]:
+    prop = merge_count(prop, [col_time[0], 'regionidcity'], 'parcelid', col_time[1] + '_city_transaction_count_total')
+    prop = merge_count(prop, [col_time[0], 'regionidzip'], 'parcelid', col_time[1] + '_region_transaction_count_total')
+    prop = merge_count(prop, [col_time[0], 'regionidcounty'], 'parcelid', col_time[1] + '_county_transaction_count_total')
+    prop = merge_count(prop, [col_time[0], 'loc_label'], 'parcelid', col_time[1] + '_loc_transaction_count_total')
+    prop = merge_count(prop, [col_time[0], 'lati', 'long'], 'parcelid', col_time[1] + '_lati_long_transaction_count_total')
+
 df_train = train.merge(prop, how='left', on='parcelid')
 
 x_train = df_train
@@ -287,7 +309,7 @@ def xgb_evaluate(min_child_weight,
     params['gamma'] = max(gamma, 0)
     params['alpha'] = max(alpha, 0)
 
-    cv_result  = xgb.cv(params, d_train, num_boost_round=2000, nfold=2,
+    cv_result  = xgb.cv(params, d_train, num_boost_round=2000, nfold=4,stratified=True,
                  early_stopping_rounds=100, verbose_eval=10, show_stdv=True)
 
     return -cv_result['test-mae-mean'].values[-1]

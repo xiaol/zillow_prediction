@@ -52,44 +52,9 @@ def get_features(df):
     df['transaction_date'] = df['transactiondate'] - hard_date
     df['transaction_date'] = df['transaction_date'].dt.days
 
+    df['transactiondate_quarter'] = df['transactiondate'].dt.quarter
+
     df = df.drop('transactiondate', axis=1)
-    '''
-    df['tax_rt'] = df['taxamount'] / df['taxvaluedollarcnt']
-    df['extra_bathroom_cnt'] = df['bathroomcnt'] - df['bedroomcnt']
-    df['room_sqt'] = df['calculatedfinishedsquarefeet']/(df['roomcnt'] + 1)
-    df['structure_tax_rt'] = df['structuretaxvaluedollarcnt'] / df['taxvaluedollarcnt']
-    df['land_tax_rt'] = df['landtaxvaluedollarcnt'] / df['taxvaluedollarcnt']
-    '''
-
-    # 商圈内待售房屋数量
-    df = merge_nunique(df, ['loc_label'], 'parcelid', 'loc_building_num')
-    df = merge_nunique(df, ['regionidzip'], 'parcelid', 'region_property_num')
-    df = merge_nunique(df, ['regionidcity'], 'parcelid', 'city_property_num')
-    df = merge_nunique(df, ['regionidcounty'], 'parcelid', 'county_property_num')
-    df = merge_nunique(df, ['lati', 'long'], 'parcelid', 'county_property_num')
-
-    for col_time in [('transaction_month','month'), ('transaction_month_day','month_day'), ('transaction_day', 'day'), ('yearbuilt','year_built'),
-                     ('assessmentyear', 'assessmentyear'), ('buildingqualitytypeid','buildingqualitytypeid'), ('heatingorsystemtypeid', 'heatingorsystemtypeid'),('storytypeid', 'storytypeid'),
-                     ('propertylandusetypeid','propertylandusetypeid'), ('pooltypeid10','pooltypeid10'), ('pooltypeid2','pooltypeid2'), ('pooltypeid7','pooltypeid7'),
-                     ('architecturalstyletypeid', 'architecturalstyletypeid'), ('buildingclasstypeid','buildingclasstypeid'),
-                     ('propertylandusetypeid','propertylandusetypeid'),('propertycountylandusecode', 'propertycountylandusecode') ,('propertyzoningdesc', 'propertyzoningdesc'),
-                     ('typeconstructiontypeid', 'typeconstructiontypeid')]:
-        df = merge_count(df, [col_time[0],'regionidcity'], 'parcelid', col_time[1]+'_city_transaction_count')
-        df = merge_count(df, [col_time[0],'regionidzip'], 'parcelid', col_time[1]+'_region_transaction_count')
-        df = merge_count(df, [col_time[0],'regionidcounty'], 'parcelid', col_time[1]+'_county_transaction_count')
-        df = merge_count(df, [col_time[0],'loc_label'], 'parcelid', col_time[1]+'_loc_transaction_count')
-        df = merge_count(df, [col_time[0],'lati', 'long'], 'parcelid', col_time[1]+'_lati_long_transaction_count')
-    # 商圈房屋状况均值
-    for col in ['finishedsquarefeet12', 'garagetotalsqft', 'yearbuilt', 'calculatedfinishedsquarefeet', 'lotsizesquarefeet',
-                'unitcnt', 'poolcnt', 'taxamount', 'taxvaluedollarcnt', 'landtaxvaluedollarcnt', 'buildingqualitytypeid','bathroomcnt','roomcnt',
-                'fullbathcnt','calculatedbathnbr']:
-        df = merge_mean(df, ['loc_label'], col, 'loc_'+col+'_mean')
-        df = merge_mean(df, ['regionidzip'], col, 'region_'+col+'_mean')
-        df = merge_mean(df, ['regionidcity'], col, 'city_'+col+'_mean')
-        df = merge_mean(df, ['regionidcounty'], col, 'county_'+col+'_mean')
-        df = merge_mean(df, ['lati', 'long'], col, 'county_'+col+'_mean')
-
-    # -----------------------------------------------------------------------------------------------
 
     return df
 
@@ -107,11 +72,14 @@ sample = pd.read_csv('../../data/sample_submission.csv')
 
 string_cols = []
 for c, dtype in zip(prop.columns, prop.dtypes):
-    if dtype == object:
+    if dtype == object or c in one_hot_encode_cols:
         # prop[c] = prop[c].astype(np.int32)  # categorical_column_with_hash_bucket only support string and int
         string_cols.append(c)
+        lbl = preprocessing.LabelEncoder()
+        lbl.fit(list(prop[c].values))
+        prop[c] = lbl.transform(list(prop[c].values))
 
-string_cols.extend(one_hot_encode_cols)
+# string_cols.extend(one_hot_encode_cols)
 string_cols = set(string_cols)
 
 print('Creating training set ...')
@@ -128,39 +96,19 @@ train = train[train.logerror < 0.419]
 
 # prop['censustractandblock'] /= 1e12
 
-# There's 25 different property uses - let's compress them down to 4 categories
-prop['N-PropType'] = prop.propertylandusetypeid.replace(
-        {31: "Mixed", 46: "Other", 47: "Mixed", 246: "Mixed", 247: "Mixed", 248: "Mixed", 260: "Home", 261: "Home",
-         262: "Home", 263: "Home", 264: "Home", 265: "Home", 266: "Home", 267: "Home", 268: "Home", 269: "Not Built",
-         270: "Home", 271: "Home", 273: "Home", 274: "Other", 275: "Home", 276: "Home", 279: "Home", 290: "Not Built",
-         291: "Not Built"})
+
 
 # brc = Birch(branching_factor=5, n_clusters=None, threshold=0.02, compute_labels=True)
 # prop['loc_label'] = brc.fit_predict(prop[['latitude', 'longitude']])
 
-kmeans = MiniBatchKMeans(n_clusters=100, batch_size=1000).fit(prop[['latitude', 'longitude']])
-prop.loc[:, 'loc_label'] = kmeans.labels_
-print('Number of loc label: {}'.format(len(set(prop['loc_label']))))
-
-prop['lati'] = prop['latitude']/10000
-prop['long'] = prop['longitude']/10000
-prop['lati'] = prop['lati'].apply(np.round)
-prop['long'] = prop['long'].apply(np.round)
 
 df_train = train.merge(prop, how='left', on='parcelid')
 
 x_train = df_train
 x_train = get_features(x_train)
-string_cols.add('N-PropType')
 # x_train = prepare_data(x_train, one_hot_encode_cols)
 x_train = x_train.drop(drop_cols, axis=1)
 
-le_dict = {}
-for str_col in string_cols:
-    le = preprocessing.LabelEncoder()
-    le.fit(prop[str_col])
-    x_train[str_col] = le.transform(x_train[str_col])
-    le_dict[str_col] = le
 
 # x_train = x_train.drop('censustractandblock', axis=1)
 
@@ -192,30 +140,45 @@ y_train = y_scaler.transform(y_train.reshape(-1, 1))
 print(x_train.shape, y_train.shape)
 print x_train.columns
 pd.Series(list(x_train.columns)).to_csv('../../data/columns.csv')
+'''
+select_qtr4 = df_train["transactiondate_quarter"] == 4
 
-
-del df_train; gc.collect()
-
-
-x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, stratify=x_train['transaction_month'].values, train_size=0.8, random_state=1)
+y_train = y_train[~select_qtr4]
+x_train = x_train[~select_qtr4]
+x_valid = x_train[select_qtr4]
+y_valid = y_train[select_qtr4]
+'''
+x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, stratify=x_train['transaction_month'].values, train_size=0.98, random_state=1)
 # x_train, y_train, x_valid, y_valid = x_train[:split], y_train[:split], x_train[split:], y_train[split:]
+del df_train; gc.collect()
 
 print('Training ...')
 
-model_dir = "../../data/model2/"
+model_dir = "../../data/model7/"
 
 
 feature_cols = [tf.feature_column.numeric_column(k) for k in numeric_cols]
-feature_category_cols = [tf.feature_column.categorical_column_with_hash_bucket(k, hash_bucket_size=1000, dtype=tf.int64) for k in string_cols]
-feature_category_cols_emb = [tf.feature_column.embedding_column(k, dimension=8) for k in feature_category_cols]
-feature_cols.extend(feature_category_cols_emb)
+
+
+
+for string_col in string_cols:
+    voca_list = map(int,list(prop[string_col].unique()))
+    feature_category_col = tf.feature_column.categorical_column_with_vocabulary_list(key=string_col, vocabulary_list=voca_list, dtype=tf.as_dtype(prop[string_col].dtype))
+    if len(voca_list) < 3:
+        emb_dim = len(voca_list)
+    else:
+        emb_dim = max(int(np.log(len(voca_list))),1)
+    feature_category_col_emb = tf.feature_column.embedding_column(feature_category_col, dimension=emb_dim)
+    feature_cols.append(feature_category_col_emb)
+
+
 print(len(feature_cols))
 hidden_units = []
-hidden_units.extend([512, 512, 512,512])
+hidden_units.extend([1024, 512])
 hidden_units.extend([])
 print(hidden_units)
 regressor = tf.estimator.DNNRegressor(feature_columns=feature_cols, hidden_units=hidden_units,
-                                      model_dir=model_dir, dropout=0.2)   #=tf.train.AdagradOptimizer(learning_rate=0.003))
+                                      model_dir=model_dir)   #=tf.train.AdagradOptimizer(learning_rate=0.003))
 
 LABEL = 'logerror'
 
@@ -227,39 +190,46 @@ def get_input_fn(data_set, label, num_epochs=None, shuffle=True):
       num_epochs=num_epochs,
       shuffle=shuffle)
 
-print(x_train.head())
-regressor.train(input_fn=get_input_fn(x_train, y_train), steps=100)
+regressor.train(input_fn=get_input_fn(x_train, y_train), steps=2500)
 
-for i in range(50):
+for i in range(2000):
     print(str(i))
-    '''
+
+    ev = regressor.evaluate(
+        input_fn=get_input_fn(x_train, y_train, num_epochs=1, shuffle=False))
+
+    loss_score = ev["loss"]
+    print("Train Loss: {0:f}".format(loss_score))
+
     ev = regressor.evaluate(
         input_fn=get_input_fn(x_valid, y_valid, num_epochs=1, shuffle=False))
 
     loss_score = ev["loss"]
-    print("Loss: {0:f}".format(loss_score))
-    '''
+    print("Valid Loss: {0:f}".format(loss_score))
+
 
     y = regressor.predict(
-        input_fn=get_input_fn(x_valid, [0]*x_valid.shape[0], num_epochs=1, shuffle=False))
+        input_fn=get_input_fn(x_train, [0] * y_train.shape[0], num_epochs=1, shuffle=False))
+    # .predict() returns an iterator of dicts; convert to a list and print
+    # predictions
+    predictions = list(p["predictions"][0] for p in itertools.islice(y, x_train.shape[0]))
+
+    mae = MAE(y_train, predictions)
+    print("Train MAE: {}".format(mae))
+
+    y = regressor.predict(
+        input_fn=get_input_fn(x_valid, [0] * y_valid.shape[0], num_epochs=1, shuffle=False))
     # .predict() returns an iterator of dicts; convert to a list and print
     # predictions
     predictions = list(p["predictions"][0] for p in itertools.islice(y, x_valid.shape[0]))
 
-    '''
-    nd_pre = np.array(predictions)
-    predictions = y_scaler.transform(nd_pre.reshape(-1,1))
-    '''
-
-
-
     mae = MAE(y_valid, predictions)
     print("Valid MAE: {}".format(mae))
-    if mae < 0.0529:
-        print(predictions)
+    if mae < 0.0511:
+        print('hit')
         # break
 
-    regressor.train(input_fn=get_input_fn(x_train, y_train), steps=10)
+    regressor.train(input_fn=get_input_fn(x_train, y_train), steps=50)
 
 raw_input("Enter something to continue ...")
 print('Building test set ...')
@@ -298,8 +268,6 @@ for c in sub.columns[sub.columns != 'ParcelId']:
 
         x_test_fold = x_test_fold[train_columns.tolist()]
 
-        for str_col in string_cols:
-            x_test_fold[str_col] = le_dict[str_col].transform(x_test_fold[str_col])
 
         where_are_nan = np.isnan(x_test_fold)
         where_are_inf = np.isinf(x_test_fold)
