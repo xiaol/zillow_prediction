@@ -52,9 +52,148 @@ def get_features(df):
     df['transaction_date'] = df['transactiondate'] - hard_date
     df['transaction_date'] = df['transaction_date'].dt.days
 
-    df['transactiondate_quarter'] = df['transactiondate'].dt.quarter
-
     df = df.drop('transactiondate', axis=1)
+    df['tax_rt'] = df['taxamount'] / df['taxvaluedollarcnt']
+    df['extra_bathroom_cnt'] = df['bathroomcnt'] - df['bedroomcnt']
+    df['room_sqt'] = df['calculatedfinishedsquarefeet']/(df['roomcnt'] + 1)
+    df['structure_tax_rt'] = df['structuretaxvaluedollarcnt'] / df['taxvaluedollarcnt']
+    df['land_tax_rt'] = df['landtaxvaluedollarcnt'] / df['taxvaluedollarcnt']
+
+    # 商圈内待售房屋数量
+    df = merge_nunique(df, ['loc_label'], 'parcelid', 'loc_building_num')
+    df = merge_nunique(df, ['regionidzip'], 'parcelid', 'region_property_num')
+    df = merge_nunique(df, ['regionidcity'], 'parcelid', 'city_property_num')
+    df = merge_nunique(df, ['regionidcounty'], 'parcelid', 'county_property_num')
+    df = merge_nunique(df, ['lati', 'long'], 'parcelid', 'county_property_num')
+
+    for col_time in [('transaction_month','month'), ('transaction_month_day','month_day'), ('transaction_day', 'day'),('transaction_date','date'), ('yearbuilt','year_built'),
+                     ('assessmentyear', 'assessmentyear'), ('buildingqualitytypeid','buildingqualitytypeid'), ('heatingorsystemtypeid', 'heatingorsystemtypeid'),('storytypeid', 'storytypeid'),
+                     ('propertylandusetypeid','propertylandusetypeid'), ('pooltypeid10','pooltypeid10'), ('pooltypeid2','pooltypeid2'), ('pooltypeid7','pooltypeid7'),
+                     ('architecturalstyletypeid', 'architecturalstyletypeid'), ('buildingclasstypeid','buildingclasstypeid'),
+                     ('propertylandusetypeid','propertylandusetypeid'),('propertycountylandusecode', 'propertycountylandusecode') ,('propertyzoningdesc', 'propertyzoningdesc'),
+                     ('typeconstructiontypeid', 'typeconstructiontypeid')]:
+        df = merge_count(df, [col_time[0],'regionidcity'], 'parcelid', col_time[1]+'_city_transaction_count')
+        df = merge_count(df, [col_time[0],'regionidzip'], 'parcelid', col_time[1]+'_region_transaction_count')
+        df = merge_count(df, [col_time[0],'regionidcounty'], 'parcelid', col_time[1]+'_county_transaction_count')
+        df = merge_count(df, [col_time[0],'loc_label'], 'parcelid', col_time[1]+'_loc_transaction_count')
+        df = merge_count(df, [col_time[0],'lati', 'long'], 'parcelid', col_time[1]+'_lati_long_transaction_count')
+
+    for some_col in ['parcelid', ]:
+        df = merge_count(df, ['transaction_date'], some_col, 'date_'+ some_col +'_count')
+
+    # 商圈房屋状况均值
+    for col in ['finishedsquarefeet12', 'garagetotalsqft', 'yearbuilt', 'calculatedfinishedsquarefeet', 'lotsizesquarefeet',
+                'unitcnt', 'poolcnt', 'taxamount', 'taxvaluedollarcnt', 'landtaxvaluedollarcnt', 'buildingqualitytypeid','bathroomcnt','roomcnt',
+                'fullbathcnt','calculatedbathnbr']:
+        #TODO select features
+        df = merge_mean(df, ['loc_label'], col, 'loc_'+col+'_mean')
+        df = merge_mean(df, ['regionidzip'], col, 'region_'+col+'_mean')
+        df = merge_mean(df, ['regionidcity'], col, 'city_'+col+'_mean')
+        df = merge_mean(df, ['regionidcounty'], col, 'county_'+col+'_mean')
+        df = merge_mean(df, ['lati', 'long'], col, 'lati_long_'+col+'_mean')
+
+
+        df = merge_median(df, ['loc_label'], col, 'loc_'+col+'_median')
+        df = merge_median(df, ['regionidzip'], col, 'region_'+col+'_median')
+        df = merge_median(df, ['regionidcity'], col, 'city_'+col+'_median')
+        df = merge_median(df, ['regionidcounty'], col, 'county_'+col+'_median')
+        df = merge_median(df, ['lati', 'long'], col, 'lati_long_'+col+'_median')
+
+        df = merge_std(df, ['loc_label'], col, 'loc_'+col+'_std')
+        df = merge_std(df, ['regionidzip'], col, 'region_'+col+'_std')
+        df = merge_std(df, ['regionidcity'], col, 'city_'+col+'_std')
+        df = merge_std(df, ['regionidcounty'], col, 'county_'+col+'_std')
+        df = merge_std(df, ['lati', 'long'], col, 'lati_long_'+col+'_std')
+
+    for col in ['finishedsquarefeet12', 'garagetotalsqft', 'calculatedfinishedsquarefeet', 'lotsizesquarefeet',
+                'unitcnt', 'poolcnt', 'taxamount', 'taxvaluedollarcnt', 'landtaxvaluedollarcnt']:
+
+        df = merge_sum(df, ['loc_label'], col, 'loc_'+col+'_sum')
+        df = merge_sum(df, ['regionidzip'], col, 'region_'+col+'_sum')
+        df = merge_sum(df, ['regionidcity'], col, 'city_'+col+'_sum')
+        df = merge_sum(df, ['regionidcounty'], col, 'county_'+col+'_sum')
+        df = merge_sum(df, ['lati', 'long'], col, 'lati_long_'+col+'_sum')
+    # -----------------------------------------------------------------------------------------------
+
+    # life of property
+    df['N-life'] = 2018 - df['yearbuilt']
+
+    # error in calculation of the finished living area of home
+    df['N-LivingAreaError'] = df['calculatedfinishedsquarefeet'] / df['finishedsquarefeet12']
+
+    # proportion of living area
+    df['N-LivingAreaProp'] = df['calculatedfinishedsquarefeet'] / df['lotsizesquarefeet']
+    df['N-LivingAreaProp2'] = df['finishedsquarefeet12'] / df['finishedsquarefeet15']
+
+    # Amout of extra space
+    df['N-ExtraSpace'] = df['lotsizesquarefeet'] - df['calculatedfinishedsquarefeet']
+    df['N-ExtraSpace-2'] = df['finishedsquarefeet15'] - df['finishedsquarefeet12']
+
+    # Total number of rooms
+    df['N-TotalRooms'] = df['bathroomcnt'] * df['bedroomcnt']
+
+    # Average room size
+    df['N-AvRoomSize'] = df['calculatedfinishedsquarefeet'] / df['roomcnt']
+
+    # Number of Extra rooms
+    df['N-ExtraRooms'] = df['roomcnt'] - df['N-TotalRooms']
+
+    # Ratio of the built structure value to land area
+    df['N-ValueProp'] = df['structuretaxvaluedollarcnt'] / df['landtaxvaluedollarcnt']
+
+    # Does property have a garage, pool or hot tub and AC?
+    df['N-GarPoolAC'] = ((df['garagecarcnt'] > 0) & (df['pooltypeid10'] > 0) & (
+    df['airconditioningtypeid'] != 5)) * 1
+
+    df["N-location"] = df["latitude"] + df["longitude"]
+    df["N-location-2"] = df["latitude"] * df["longitude"]
+    df["N-location-2round"] = df["N-location-2"].round(-4)
+
+    df["N-latitude-round"] = df["latitude"].round(-4)
+    df["N-longitude-round"] = df["longitude"].round(-4)
+
+
+    # ---------------------------------
+    # Ratio of tax of property over parcel
+    df['N-ValueRatio'] = df['taxvaluedollarcnt'] / df['taxamount']
+
+    # TotalTaxScore
+    df['N-TaxScore'] = df['taxvaluedollarcnt'] * df['taxamount']
+
+    # polnomials of tax delinquency year
+    df["N-taxdelinquencyyear-2"] = df["taxdelinquencyyear"] ** 2
+    df["N-taxdelinquencyyear-3"] = df["taxdelinquencyyear"] ** 3
+
+    # Length of time since unpaid taxes
+    df['N-life-tax'] = 2018 - df['taxdelinquencyyear']
+
+    #-------------------------------------------
+
+    # Indicator whether it has AC or not
+    df['N-ACInd'] = (df['airconditioningtypeid'] != 5) * 1
+
+    # Indicator whether it has Heating or not
+    df['N-HeatInd'] = (df['heatingorsystemtypeid'] != 13) * 1
+
+
+
+    #----------------------------------------------
+
+    # polnomials of the variable
+    df["N-structuretaxvaluedollarcnt-2"] = df["structuretaxvaluedollarcnt"] ** 2
+    df["N-structuretaxvaluedollarcnt-3"] = df["structuretaxvaluedollarcnt"] ** 3
+
+    # Average structuretaxvaluedollarcnt by city
+    group = df.groupby('regionidcity')['structuretaxvaluedollarcnt'].aggregate('mean').to_dict()
+    df['N-Avg-structuretaxvaluedollarcnt'] = df['regionidcity'].map(group)
+
+    # Deviation away from average
+    df['N-Dev-structuretaxvaluedollarcnt'] = abs(
+        (df['structuretaxvaluedollarcnt'] - df['N-Avg-structuretaxvaluedollarcnt'])) / df['N-Avg-structuretaxvaluedollarcnt']
+
+
+    # ----------------------------------------------------
+
 
     return df
 
@@ -100,7 +239,15 @@ train = train[train.logerror < 0.419]
 
 # brc = Birch(branching_factor=5, n_clusters=None, threshold=0.02, compute_labels=True)
 # prop['loc_label'] = brc.fit_predict(prop[['latitude', 'longitude']])
+db = DBSCAN(eps=0.2, min_samples=25).fit(prop[['latitude', 'longitude']])
+prop.loc[:, 'loc_label'] = db.labels_
+num_clusters = len(set(db.labels_)) - (1 if -1 in db.labels_ else 0)
+print('Number of clusters: {}'.format(num_clusters))
 
+prop['lati'] = prop['latitude']/10000
+prop['long'] = prop['longitude']/10000
+prop['lati'] = prop['lati'].apply(np.round)
+prop['long'] = prop['long'].apply(np.round)
 
 df_train = train.merge(prop, how='left', on='parcelid')
 
@@ -148,7 +295,7 @@ x_train = x_train[~select_qtr4]
 x_valid = x_train[select_qtr4]
 y_valid = y_train[select_qtr4]
 '''
-x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, stratify=x_train['transaction_month'].values, train_size=0.98, random_state=1)
+x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, stratify=x_train['transaction_month'].values, train_size=0.99, random_state=1)
 # x_train, y_train, x_valid, y_valid = x_train[:split], y_train[:split], x_train[split:], y_train[split:]
 del df_train; gc.collect()
 
@@ -174,7 +321,7 @@ for string_col in string_cols:
 
 print(len(feature_cols))
 hidden_units = []
-hidden_units.extend([1024, 512])
+hidden_units.extend([2048, 2048, 1024,1024, 512, 256])  # [2048, 1024, 1024, 512, 512, 200]
 hidden_units.extend([])
 print(hidden_units)
 regressor = tf.estimator.DNNRegressor(feature_columns=feature_cols, hidden_units=hidden_units,
@@ -190,9 +337,9 @@ def get_input_fn(data_set, label, num_epochs=None, shuffle=True):
       num_epochs=num_epochs,
       shuffle=shuffle)
 
-regressor.train(input_fn=get_input_fn(x_train, y_train), steps=2500)
+regressor.train(input_fn=get_input_fn(x_train, y_train), steps=1000)
 
-for i in range(2000):
+for i in range(5):
     print(str(i))
 
     ev = regressor.evaluate(
@@ -229,7 +376,7 @@ for i in range(2000):
         print('hit')
         # break
 
-    regressor.train(input_fn=get_input_fn(x_train, y_train), steps=50)
+    regressor.train(input_fn=get_input_fn(x_train, y_train), steps=1000)
 
 raw_input("Enter something to continue ...")
 print('Building test set ...')
@@ -246,7 +393,7 @@ for c in sub.columns[sub.columns != 'ParcelId']:
         continue
     p_test = np.array([])
 
-    for fold in chunks(sample, 80000):
+    for fold in chunks(sample, 3000000):
         sys.stdout.write('.')
         sys.stdout.flush()
 

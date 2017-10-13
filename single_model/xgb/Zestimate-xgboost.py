@@ -16,9 +16,9 @@ import matplotlib.pyplot as plt
 from bayes_opt import BayesianOptimization
 
 # TODO propertyzoningdesc ,remove from one hot , regionidcity, regionidneighborhood, regionidzip,
-drop_cols = ['parcelid', 'logerror', 'propertyzoningdesc'] # 'regionidcity', 'regionidneighborhood', 'regionidzip',]
-# one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcounty','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'typeconstructiontypeid', 'fips']
-one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid', 'fips']
+drop_cols = ['parcelid', 'logerror', 'propertyzoningdesc' 'regionidcity', 'regionidneighborhood', 'regionidzip',]
+one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcounty','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'typeconstructiontypeid', 'fips']
+#one_hot_encode_cols = ['airconditioningtypeid', 'architecturalstyletypeid', 'buildingclasstypeid','heatingorsystemtypeid','storytypeid', 'regionidcity', 'regionidcounty','regionidneighborhood', 'regionidzip','hashottuborspa', 'fireplaceflag', 'taxdelinquencyflag', 'propertylandusetypeid', 'propertycountylandusecode', 'propertyzoningdesc', 'typeconstructiontypeid', 'fips']
 
 def prepare_data(df, columns):
     df = pd.get_dummies(df, columns=columns, prefix=columns, sparse=True)
@@ -354,7 +354,7 @@ for c in sub.columns[sub.columns != 'ParcelId']:
         continue
     p_test = np.array([])
 
-    for fold in chunks(sample, 80000):
+    for fold in chunks(sample, 3000000):
         sys.stdout.write('.')
         sys.stdout.flush()
 
