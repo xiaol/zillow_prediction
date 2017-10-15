@@ -206,9 +206,26 @@ def chunks(l, n):
 
 print('Loading data ...')
 
-train = pd.read_csv('../../data/train_2017.csv')
-prop = pd.read_csv('../../data/properties_2017.csv').fillna(0)  # , nrows=500)
 sample = pd.read_csv('../../data/sample_submission.csv')
+
+print('Loading Properties ...')
+properties2016 = pd.read_csv('../input/properties_2016.csv', low_memory = False)
+prop = pd.read_csv('../input/properties_2017.csv', low_memory = False)
+
+print('Loading Train ...')
+train2016 = pd.read_csv('../input/train_2016_v2.csv', parse_dates=['transactiondate'], low_memory=False)
+train2017 = pd.read_csv('../input/train_2017.csv', parse_dates=['transactiondate'], low_memory=False)
+
+
+print('Merge Train with Properties ...')
+train2016 = pd.merge(train2016, properties2016, how = 'left', on = 'parcelid')
+train2017 = pd.merge(train2017, prop, how ='left', on ='parcelid')
+
+print('Tax Features 2017  ...')
+train2017.iloc[:, train2017.columns.str.startswith('tax')] = np.nan
+
+print('Concat Train 2016 & 2017 ...')
+train = pd.concat([train2016, train2017], axis = 0)
 
 string_cols = []
 for c, dtype in zip(prop.columns, prop.dtypes):
@@ -228,8 +245,8 @@ print('Creating training set ...')
 # split = train[train.transactiondate < '2016-10-01'].shape[0]
 #print(split)
 
-train = train[train.logerror > -0.4]
-train = train[train.logerror < 0.419]
+# train = train[train.logerror > -0.4]
+# train = train[train.logerror < 0.419]
 
 # prop['latitude'] = prop['latitude']*1e-6
 # prop['longitude'] = prop['longitude']*1e-6
