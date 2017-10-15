@@ -217,7 +217,7 @@ prop['lati'] = prop['latitude']/10000
 prop['long'] = prop['longitude']/10000
 prop['lati'] = prop['lati'].apply(np.round)
 prop['long'] = prop['long'].apply(np.round)
-
+'''
 for col_time in [
                  ('yearbuilt', 'year_built'),
                  ('assessmentyear', 'assessmentyear'), ('buildingqualitytypeid', 'buildingqualitytypeid'),
@@ -235,6 +235,7 @@ for col_time in [
     prop = merge_count(prop, [col_time[0], 'regionidcounty'], 'parcelid', col_time[1] + '_county_transaction_count_total')
     prop = merge_count(prop, [col_time[0], 'loc_label'], 'parcelid', col_time[1] + '_loc_transaction_count_total')
     prop = merge_count(prop, [col_time[0], 'lati', 'long'], 'parcelid', col_time[1] + '_lati_long_transaction_count_total')
+'''
 
 df_train = train.merge(prop, how='left', on='parcelid')
 

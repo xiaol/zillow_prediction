@@ -53,6 +53,7 @@ def get_features(df):
     df['transaction_date'] = df['transaction_date'].dt.days
 
     df = df.drop('transactiondate', axis=1)
+
     df['tax_rt'] = df['taxamount'] / df['taxvaluedollarcnt']
     df['extra_bathroom_cnt'] = df['bathroomcnt'] - df['bedroomcnt']
     df['room_sqt'] = df['calculatedfinishedsquarefeet']/(df['roomcnt'] + 1)
@@ -249,6 +250,10 @@ prop['long'] = prop['longitude']/10000
 prop['lati'] = prop['lati'].apply(np.round)
 prop['long'] = prop['long'].apply(np.round)
 
+prop['transactiondate']= train['transactiondate']
+df_prop = get_features(prop)
+prop.drop(['transactiondate'], axis=1)
+
 df_train = train.merge(prop, how='left', on='parcelid')
 
 x_train = df_train
@@ -273,7 +278,7 @@ assert not np.any(np.isinf(x_train))
 scaler_dict = {}
 for n_col in numeric_cols:
     scaler = preprocessing.StandardScaler()#MinMaxScaler(feature_range=(-1, 1))
-    scaler.fit(x_train[n_col].values.reshape(-1,1))
+    scaler.fit(df_prop[n_col].values.reshape(-1,1))
     x_train[n_col] = scaler.transform(x_train[n_col].values.reshape(-1,1))
     scaler_dict[n_col] = scaler
 
