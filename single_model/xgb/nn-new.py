@@ -116,11 +116,11 @@ feature_cols = [tf.feature_column.numeric_column(k) for k in numeric_cols]
 
 for c, dtype in zip(test_df.columns, test_df.dtypes):
     if c in numeric_cols:
-        test_df[c] = test_df[c].astype(np.int64)  # categorical_column_with_hash_bucket only support string and int
+        test_df[c] = test_df[c].astype(np.string)  # categorical_column_with_hash_bucket only support string and int
 
 for string_col in  [train_features[ind] for ind in cat_feature_inds]:
-    voca_list = map(int,list(test_df[string_col].unique()))
-    feature_category_col = tf.feature_column.categorical_column_with_vocabulary_list(key=string_col, vocabulary_list=voca_list, dtype=tf.int64)
+    voca_list = map(str,list(test_df[string_col].unique()))
+    feature_category_col = tf.feature_column.categorical_column_with_vocabulary_list(key=string_col, vocabulary_list=voca_list, dtype=tf.string)
     if len(voca_list) < 10000:
         emb_dim = len(voca_list)
     else:
