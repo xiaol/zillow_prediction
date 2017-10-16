@@ -7,12 +7,12 @@ import tensorflow as tf
 import itertools
 
 print('Loading Properties ...')
-properties2016 = pd.read_csv('../input/properties_2016.csv', low_memory=False)
-properties2017 = pd.read_csv('../input/properties_2017.csv', low_memory=False)
+properties2016 = pd.read_csv('../../data/properties_2016.csv', low_memory=False)
+properties2017 = pd.read_csv('../../data/properties_2017.csv', low_memory=False)
 
 print('Loading Train ...')
-train2016 = pd.read_csv('../input/train_2016_v2.csv', parse_dates=['transactiondate'], low_memory=False)
-train2017 = pd.read_csv('../input/train_2017.csv', parse_dates=['transactiondate'], low_memory=False)
+train2016 = pd.read_csv('../../data/train_2016_v2.csv', parse_dates=['transactiondate'], low_memory=False)
+train2017 = pd.read_csv('../../data/train_2017.csv', parse_dates=['transactiondate'], low_memory=False)
 
 
 def add_date_features(df):
@@ -28,7 +28,7 @@ train2016 = add_date_features(train2016)
 train2017 = add_date_features(train2017)
 
 print('Loading Sample ...')
-sample_submission = pd.read_csv('../input/sample_submission.csv', low_memory=False)
+sample_submission = pd.read_csv('../../data/sample_submission.csv', low_memory=False)
 
 print('Merge Train with Properties ...')
 train2016 = pd.merge(train2016, properties2016, how='left', on='parcelid')
