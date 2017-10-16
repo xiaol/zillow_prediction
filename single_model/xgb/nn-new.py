@@ -116,7 +116,7 @@ feature_cols = [tf.feature_column.numeric_column(k) for k in numeric_cols]
 
 
 
-for string_col in cat_feature_inds:
+for string_col in  [train_features[ind] for ind in cat_feature_inds]:
     voca_list = map(int,list(test_df[string_col].unique()))
     feature_category_col = tf.feature_column.categorical_column_with_vocabulary_list(key=string_col, vocabulary_list=voca_list, dtype=tf.as_dtype(test_df[string_col].dtype))
     if len(voca_list) < 3:
