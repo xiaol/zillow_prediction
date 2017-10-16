@@ -114,12 +114,14 @@ model_dir = "../../data/model7/"
 numeric_cols = set(train_features)-set(cat_feature_inds)
 feature_cols = [tf.feature_column.numeric_column(k) for k in numeric_cols]
 
-
+for c, dtype in zip(test_df.columns, test_df.dtypes):
+    if c in numeric_cols:
+        test_df[c] = test_df[c].astype(np.int64)  # categorical_column_with_hash_bucket only support string and int
 
 for string_col in  [train_features[ind] for ind in cat_feature_inds]:
     voca_list = map(int,list(test_df[string_col].unique()))
-    feature_category_col = tf.feature_column.categorical_column_with_vocabulary_list(key=string_col, vocabulary_list=voca_list, dtype=tf.as_dtype(test_df[string_col].dtype))
-    if len(voca_list) < 3:
+    feature_category_col = tf.feature_column.categorical_column_with_vocabulary_list(key=string_col, vocabulary_list=voca_list, dtype=tf.int64)
+    if len(voca_list) < 10000:
         emb_dim = len(voca_list)
     else:
         emb_dim = max(int(np.log(len(voca_list))),1)
@@ -170,4 +172,4 @@ for label, test_date in test_dates.items():
     print("Predicting for: %s ... " % (label))
     submission[label] = y_pred
 
-submission.to_csv('Only_CatBoost.csv', float_format='%.6f', index=False)
+submission.to_csv('../../data/Only_NN.csv', float_format='%.6f', index=False)
